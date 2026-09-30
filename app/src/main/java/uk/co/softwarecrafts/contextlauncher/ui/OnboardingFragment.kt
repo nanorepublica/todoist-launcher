@@ -28,6 +28,10 @@ import uk.co.softwarecrafts.contextlauncher.Graph
 import uk.co.softwarecrafts.contextlauncher.calendar.CalendarStore
 import uk.co.softwarecrafts.contextlauncher.core.stage.DefaultSchedule
 import uk.co.softwarecrafts.contextlauncher.data.AppPrefs
+import uk.co.softwarecrafts.contextlauncher.data.todoist.SyncStatus
+import uk.co.softwarecrafts.contextlauncher.data.todoist.TodoistSyncWorker
+import app.olauncher.helper.hideKeyboard
+import java.time.LocalDateTime
 import java.time.DayOfWeek
 import java.time.format.DateTimeFormatter
 
@@ -73,6 +77,9 @@ class OnboardingFragment : Fragment() {
         }
         binding.stepScheduleAction.setOnClickListener { writeSchedule() }
         binding.finish.setOnClickListener { finish() }
+        binding.todoistSave.setOnClickListener { saveTodoistToken() }
+        binding.todoistOpenSettings.setOnClickListener { requireContext().openUrl(TODOIST_INTEGRATIONS_URL) }
+        binding.todoistForget.setOnClickListener { forgetTodoistToken() }
 
         binding.stepScheduleList.text = DefaultSchedule.blocks.joinToString("\n") { block ->
             val days = if (block.days.contains(DayOfWeek.SATURDAY)) "Sat, Sun" else "Mon to Fri"
@@ -128,6 +135,61 @@ class OnboardingFragment : Fragment() {
             )
             binding.stepScheduleAction.setActive(info != null && !hasSchedule)
         }
+        refreshTodoistStatus()
+    }
+
+    private fun refreshTodoistStatus() {
+        val ctx = context ?: return
+        val repo = Graph.todoist(ctx.applicationContext)
+        binding.todoistForget.setActive(repo.hasToken)
+        binding.todoistSave.setActive(true)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val status = repo.status.value
+            val last = withContext(Dispatchers.IO) { repo.lastSyncAt() }
+            if (_binding == null) return@launch
+            binding.stepTodoistStatus.text = when {
+                !repo.hasToken -> getString(R.string.todoist_status_none)
+                status is SyncStatus.Syncing -> getString(R.string.todoist_syncing)
+                status is SyncStatus.Ok -> getString(R.string.todoist_status_ok, status.taskCount, LocalDateTime.ofInstant(status.at, Graph.clock.zone).format(TIME))
+                status is SyncStatus.Failed -> getString(R.string.todoist_status_failed, status.message)
+                last != null -> getString(R.string.status_done)
+                else -> getString(R.string.status_todo)
+            }
+        }
+    }
+
+    private fun saveTodoistToken() {
+        val ctx = requireContext().applicationContext
+        val typed = binding.todoistToken.text?.toString()?.trim().orEmpty()
+        val repo = Graph.todoist(ctx)
+        if (typed.isEmpty() && !repo.hasToken) {
+            ctx.showToast(getString(R.string.todoist_token_hint))
+            return
+        }
+        binding.todoistToken.hideKeyboard()
+        if (typed.isNotEmpty()) {
+            repo.saveToken(typed)
+            if (!repo.hasToken) {
+                ctx.showToast(getString(R.string.todoist_token_store_failed))
+                return
+            }
+        }
+        binding.stepTodoistStatus.text = getString(R.string.todoist_syncing)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val status = repo.sync(forceFull = true)
+            if (status is SyncStatus.Ok) {
+                binding.todoistToken.text?.clear()
+                TodoistSyncWorker.schedule(ctx)
+            }
+            refreshTodoistStatus()
+        }
+    }
+
+    private fun forgetTodoistToken() {
+        val ctx = requireContext().applicationContext
+        Graph.todoist(ctx).saveToken(null)
+        TodoistSyncWorker.cancel(ctx)
+        refreshTodoistStatus()
     }
 
     private fun createLocalCalendar() {
@@ -245,5 +307,6 @@ class OnboardingFragment : Fragment() {
     private companion object {
         val TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
         const val GOOGLE_CREATE_CALENDAR_URL = "https://calendar.google.com/calendar/r/settings/createcalendar"
+        const val TODOIST_INTEGRATIONS_URL = "https://app.todoist.com/app/settings/integrations/developer"
     }
 }

@@ -17,6 +17,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.navigation.fragment.findNavController
 import app.olauncher.BuildConfig
 import app.olauncher.MainViewModel
@@ -100,6 +102,7 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
             R.id.appInfo -> openAppInfo(requireContext(), Process.myUserHandle(), BuildConfig.APPLICATION_ID)
             R.id.setLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.runSetup -> findNavController().navigate(R.id.action_settingsFragment_to_onboardingFragment)
+            R.id.syncTodoist -> syncTodoistNow()
             R.id.exportConfig -> configTransfer.export()
             R.id.importConfig -> showDialog(
                 requireContext().createDialog(
@@ -151,6 +154,7 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
         binding.appInfo.setOnClickListener(this)
         binding.setLauncher.setOnClickListener(this)
         binding.runSetup.setOnClickListener(this)
+        binding.syncTodoist.setOnClickListener(this)
         binding.exportConfig.setOnClickListener(this)
         binding.importConfig.setOnClickListener(this)
         binding.resetConfig.setOnClickListener(this)
@@ -242,6 +246,26 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
     }
 
     // Dialogs
+
+    private fun syncTodoistNow() {
+        val ctx = requireContext().applicationContext
+        val repo = uk.co.softwarecrafts.contextlauncher.Graph.todoist(ctx)
+        if (!repo.hasToken) {
+            ctx.showToast(getString(R.string.connect_todoist))
+            return
+        }
+        ctx.showToast(getString(R.string.todoist_syncing))
+        viewLifecycleOwner.lifecycleScope.launch {
+            val status = repo.sync()
+            ctx.showToast(
+                when (status) {
+                    is uk.co.softwarecrafts.contextlauncher.data.todoist.SyncStatus.Ok -> getString(R.string.todoist_status_ok, status.taskCount, java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")))
+                    is uk.co.softwarecrafts.contextlauncher.data.todoist.SyncStatus.Failed -> getString(R.string.todoist_status_failed, status.message)
+                    else -> getString(R.string.todoist_status_none)
+                }
+            )
+        }
+    }
 
     private fun showDialog(newDialog: OlDialog) {
         dialog?.dismiss()

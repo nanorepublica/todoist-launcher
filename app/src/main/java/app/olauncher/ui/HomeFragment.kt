@@ -48,6 +48,10 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.launch
 import uk.co.softwarecrafts.contextlauncher.Graph
 import uk.co.softwarecrafts.contextlauncher.engine.StageState
+import uk.co.softwarecrafts.contextlauncher.core.stage.TaskSnapshot
+import uk.co.softwarecrafts.contextlauncher.core.todoist.TodayTasks
+import app.olauncher.helper.createDialog
+import kotlinx.coroutines.flow.combine
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.text.SimpleDateFormat
@@ -79,6 +83,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
 
         initObservers()
         observeStage()
+        observeTasks()
         setHomeAlignment(prefs.homeAlignment)
         initSwipeTouchListener()
         initClickListeners()
@@ -87,6 +92,8 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
     override fun onResume() {
         super.onResume()
         Graph.stageEngine(requireContext()).refresh()
+        val appContext = requireContext().applicationContext
+        viewLifecycleOwner.lifecycleScope.launch { Graph.todoist(appContext).syncIfStale() }
         populateHomeScreen(false)
         viewModel.isOlauncherDefault()
         if (prefs.showStatusBar) showStatusBar()
@@ -103,6 +110,8 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
             R.id.setDefaultLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.tvScreenTime -> openScreenTimeDigitalWellbeing()
             R.id.tvStage -> if (Graph.stageEngine(requireContext()).state.value is StageState.SetupNeeded)
+                findNavController().navigate(R.id.action_mainFragment_to_onboardingFragment)
+            R.id.tvTasksHeader -> if (!Graph.todoist(requireContext()).hasToken)
                 findNavController().navigate(R.id.action_mainFragment_to_onboardingFragment)
 
             else -> {
@@ -240,6 +249,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
         binding.setDefaultLauncher.setOnLongClickListener(this)
         binding.tvScreenTime.setOnClickListener(this)
         binding.tvStage.setOnClickListener(this)
+        binding.tvTasksHeader.setOnClickListener(this)
         binding.tvScreenTime.setOnLongClickListener(this)
 
         // These fire only on d-pad/keyboard events; touch is consumed by ViewSwipeTouchListener
@@ -293,6 +303,70 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
                 }
             }
         }
+    }
+
+    private fun observeTasks() {
+        val appContext = requireContext().applicationContext
+        val engine = Graph.stageEngine(appContext)
+        val todoist = Graph.todoist(appContext)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                combine(todoist.snapshotFlow(), engine.state) { tasks, state -> tasks to state }
+                    .collect { (tasks, state) -> renderTasks(tasks, state) }
+            }
+        }
+    }
+
+    private fun renderTasks(tasks: List<TaskSnapshot>, state: StageState) {
+        val todoist = Graph.todoist(requireContext())
+        val list = binding.tasksList
+        list.removeAllViews()
+        if (!todoist.hasToken) {
+            binding.tvTasksHeader.text = getString(R.string.connect_todoist)
+            return
+        }
+        val gatingLabel = (state as? StageState.Ready)?.resolution?.stage?.doneLabel
+        val rows = TodayTasks.rows(tasks, Graph.clock.today(), gatingLabel)
+        binding.tvTasksHeader.text = if (rows.isEmpty()) getString(R.string.no_tasks_today) else getString(R.string.today_header)
+        rows.take(MAX_TASK_ROWS).forEach { row ->
+            val view = TextView(requireContext(), null, 0, R.style.TextSmall).apply {
+                text = buildString {
+                    append(if (row.gating) "● " else "○ ")
+                    append(row.task.content)
+                    row.task.dueTime?.let { append("  ").append(it.format(STAGE_TIME)) }
+                    if (row.overdue) append(getString(R.string.overdue_suffix))
+                }
+                setPadding(3.dpToPx(), 6.dpToPx(), 3.dpToPx(), 6.dpToPx())
+                setOnClickListener { confirmComplete(row.task) }
+            }
+            list.addView(view)
+        }
+        if (rows.size > MAX_TASK_ROWS) {
+            list.addView(TextView(requireContext(), null, 0, R.style.TextSmallLight).apply {
+                text = getString(R.string.more_tasks, rows.size - MAX_TASK_ROWS)
+                setPadding(3.dpToPx(), 6.dpToPx(), 3.dpToPx(), 6.dpToPx())
+            })
+        }
+    }
+
+    private fun confirmComplete(task: TaskSnapshot) {
+        val appContext = requireContext().applicationContext
+        requireContext().createDialog(title = R.string.complete_task_title, action = R.string.complete, onAction = {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val result = runCatching { Graph.todoist(appContext).complete(task.id) }
+                appContext.showToast(
+                    result.fold(
+                        { getString(R.string.task_completed, task.content) },
+                        { getString(R.string.task_complete_failed, it.message ?: "network") },
+                    )
+                )
+            }
+        }) { container ->
+            TextView(container.context, null, 0, R.style.TextSmall).apply {
+                text = task.content
+                setPadding(24.dpToPx(), 8.dpToPx(), 24.dpToPx(), 8.dpToPx())
+            }
+        }.showRespectingStatusBar()
     }
 
     private fun populateDateTime() {
@@ -737,6 +811,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
 
     private companion object {
         val STAGE_TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        const val MAX_TASK_ROWS = 6
     }
 
     override fun onDestroyView() {
