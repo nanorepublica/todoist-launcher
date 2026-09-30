@@ -1,47 +1,40 @@
-![Olauncher](https://repository-images.githubusercontent.com/278638069/db0acb80-661b-11eb-803e-926cae5dccb4)
+# Context launcher
 
+A minimal, text-only Android launcher that narrows the phone to what the
+current part of the day needs, and opens up once that stage's tasks are done.
 
-# Olauncher | Minimal AF Launcher
-AF stands for Ad-Free! :D
+- The day runs as named stages from a dedicated Google calendar.
+- Todoist labels decide what "done" means for a stage.
+- Apps outside the current stage stay reachable through search, greyed out,
+  behind a friction screen with a time limit. No hard blocking.
+- Every bypass and minute is logged, and a weekly review turns the log into
+  one-tap changes.
 
-[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-    alt="Get it on Play Store"
-    height="80" align="middle">](https://play.google.com/store/apps/details?id=app.olauncher)
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-    alt="Get it on F-Droid"
-    height="80" align="middle">](https://f-droid.org/packages/app.olauncher)
-[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png"
-    alt="Get it on IzzyOnDroid"
-    height="54" hspace="13" align="middle">](https://apt.izzysoft.de/packages/app.olauncher)
+See [SPEC.md](SPEC.md) for the full v1 spec and [CLAUDE.md](CLAUDE.md) for
+build commands, layout and design decisions.
 
-### Install using [Play Store](https://play.google.com/store/apps/details?id=app.olauncher), [F-Droid](https://f-droid.org/packages/app.olauncher), [IzzyOnDroid](https://apt.izzysoft.de/packages/app.olauncher) or the [latest APK](https://github.com/tanujnotes/Olauncher/releases/).
+## Building
 
-- To maintain the simplicity of the launcher, a few niche features are available but hidden.
+Debug builds need the Android SDK (Android Studio is the easy way):
 
-- Please check out the **[About](https://tanujnotes.substack.com/p/olauncher-minimal-af-launcher?utm_source=github)** page in the Olauncher settings for a complete list of features and **FAQs**.
+```sh
+./gradlew :app:assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
 
-##
+The engine tests run on any JVM without the SDK:
 
-License: [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+```sh
+cd core && ../gradlew test
+```
 
-Contact: [X/Twitter](https://x.com/tanujnotes) • [Reddit](https://reddit.com/user/tanujnotes/) • [Bluesky](https://bsky.app/profile/tanujnotes.bsky.social)
+## Status
 
-##
+Personal use first, built for a Fairphone 5. Phase 0 (fork baseline) is done;
+see the phase plan in CLAUDE.md.
 
-### My other apps:
+## Credits and license
 
-- [Pro Launcher](https://play.google.com/store/apps/details?id=app.prolauncher) - Pro version of Olauncher with extra features like widgets, weather, folders, etc.
-
-- [Note to Self](https://play.google.com/store/apps/details?id=com.makenotetoself) - Free and [open source](https://github.com/jeerovan/ntsapp) notes app with chat like interface and end-to-end encryption.
-
-- [Pentastic](https://play.google.com/store/apps/details?id=app.pentastic) - Minimal todo lists. Free and [open source](https://github.com/tanujnotes/Pentastic).
-
-##
-
-### Help me get a new phone for testing:
-
-[<img src="https://img.buymeacoffee.com/button-api/?emoji=&slug=tanujnotes&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff"
-    alt="Get it on Play Store"
-    height="80">](https://www.buymeacoffee.com/tanujnotes)
-
-Thank you!
+Forked from [Olauncher](https://github.com/tanujnotes/Olauncher) by Tanuj
+Sharma, with ideas from [barakh's fork](https://github.com/barakh/Olauncher).
+Licensed under the [GNU GPLv3](LICENSE).
