@@ -16,6 +16,8 @@ import java.time.Instant
 object Mappers {
 
     private const val KEY_CALENDAR_NAME = "calendarName"
+    private const val KEY_CLAUDE_HIDDEN = "claudeHiddenStages"
+    private const val KEY_CLAUDE_PACKAGE = "claudePackage"
 
     fun toEntity(stage: Stage, sortOrder: Int) = StageEntity(
         id = stage.id,
@@ -53,12 +55,20 @@ object Mappers {
         kind = runCatching { GroupKind.valueOf(row.kind) }.getOrDefault(GroupKind.NORMAL),
     )
 
-    fun toSettingRows(settings: GeneralSettings): List<SettingEntity> =
-        listOf(SettingEntity(KEY_CALENDAR_NAME, settings.calendarName))
+    fun toSettingRows(settings: GeneralSettings): List<SettingEntity> = listOf(
+        SettingEntity(KEY_CALENDAR_NAME, settings.calendarName),
+        SettingEntity(KEY_CLAUDE_HIDDEN, ConfigJson.encodeStrings(settings.claudeHiddenStages)),
+        SettingEntity(KEY_CLAUDE_PACKAGE, settings.claudePackage),
+    )
 
     fun toSettings(rows: List<SettingEntity>): GeneralSettings {
         val byKey = rows.associate { it.key to it.value }
-        return GeneralSettings(calendarName = byKey[KEY_CALENDAR_NAME])
+        val defaults = GeneralSettings()
+        return GeneralSettings(
+            calendarName = byKey[KEY_CALENDAR_NAME],
+            claudeHiddenStages = byKey[KEY_CLAUDE_HIDDEN]?.let { runCatching { ConfigJson.decodeStrings(it) }.getOrNull() } ?: defaults.claudeHiddenStages,
+            claudePackage = byKey[KEY_CLAUDE_PACKAGE] ?: defaults.claudePackage,
+        )
     }
 
     fun toConfig(

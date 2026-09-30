@@ -45,6 +45,10 @@ data class LauncherConfig(
 data class GeneralSettings(
     /** Display name of the dedicated Google calendar that carries the stages. */
     val calendarName: String? = null,
+    /** Stage ids during which the "speak" action does not offer Claude as a destination. */
+    val claudeHiddenStages: List<String> = listOf("wind_down"),
+    /** Package name of the Claude app that receives shared text. */
+    val claudePackage: String = "com.anthropic.claude",
 )
 
 @Serializable
