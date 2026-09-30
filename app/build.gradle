@@ -14,13 +14,13 @@ android {
     }
 
     defaultConfig {
-        applicationId "app.olauncher"
-        minSdkVersion 24
+        applicationId "uk.co.softwarecrafts.contextlauncher"
+        minSdkVersion 33
         targetSdkVersion 36
-        versionCode 113
-        versionName "v6.9.17"
+        versionCode 1
+        versionName "0.1.0"
 
-        resourceConfigurations += ["en", "ar", "cs", "da", "de", "el", "es-rES", "es-rUS", "fi", "fr", "he", "hi", "hr", "hu", "in", "it", "ja", "ko", "nb", "nl", "pl", "pt-rBR", "ro", "ru-rRU", "sv", "th", "tr", "uk", "vi", "zh"]
+        resourceConfigurations += ["en"]
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
