@@ -27,10 +27,11 @@ it sits beside any other launcher. Set it as default from the phone's
 Settings > Apps > Default apps > Home app, or from the launcher's own settings
 (long-press the home screen).
 
-Cloud sessions: the container's network policy blocks `dl.google.com`, which
-serves both the Android SDK and the Android Gradle plugin. Only the core tests
-run there. That is why `core` is a separate Gradle build with just Maven
-Central (see below).
+Cloud sessions start from a clean container with no Android SDK. Run
+`scripts/install-android-sdk.sh` once per session (needs `dl.google.com` on
+the environment's network allowlist; it is) before any `:app` task. The
+`core` build only needs Maven Central, which is why it is a separate Gradle
+build (see below): its tests run even without the SDK.
 
 ## Layout
 
@@ -53,6 +54,7 @@ app/                            Android app (Olauncher fork)
     helper/MyAccessibilityService.kt  double-tap lock (reused for "time's up")
     helper/usageStats/          UsageStatsManager event reader
 gradle/libs.versions.toml       version catalog shared by both builds
+scripts/install-android-sdk.sh  SDK bootstrap for cloud sessions
 ```
 
 New code goes under `uk.co.softwarecrafts.contextlauncher.*`. Borrowed
