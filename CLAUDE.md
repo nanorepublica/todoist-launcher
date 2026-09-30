@@ -152,9 +152,14 @@ included build. `core/settings.gradle` reuses the root version catalog.
 - The accessibility service runs in the main process (Olauncher had it in
   ":serviceProcess") so it shares the GateController singleton.
 - Upstream already declares INTERNET and PACKAGE_USAGE_STATS; nothing to add.
-- Gestures (for phase 4): swipe right opens the app list; swipe left is
-  reserved for the filtered notification list (v2, so a no-op in v1). This
-  retires Olauncher's "swipe left/right app" setting.
+- Gestures: swipe up or left opens the app list; swipe right is reserved for
+  the filtered notification list (v2, so a no-op in v1). This retires
+  Olauncher's "swipe left/right app" setting.
+- App classes beyond the stage allowlists: `hiddenApps` (background-only,
+  never listed), groups of kind `unrestricted` (allowed in every stage,
+  shown on the home screen under the group name) and kind `occasional`
+  (listed only while a search is typed, gated normally). Long-press in the
+  app list toggles them; Settings > Context > Hidden apps unhides.
 
 ## Phase plan
 

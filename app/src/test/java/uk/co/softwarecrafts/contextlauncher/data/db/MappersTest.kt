@@ -12,13 +12,14 @@ class MappersTest {
 
     @Test
     fun `seed config survives a trip through the row types`() {
-        val seed = SeedConfig.default().copy(alwaysAllowed = listOf("com.example.a", "com.example.b"))
+        val seed = SeedConfig.default().copy(alwaysAllowed = listOf("com.example.a", "com.example.b"), hiddenApps = listOf("com.bg"))
         val back = Mappers.toConfig(
             stages = seed.stages.mapIndexed { i, s -> Mappers.toEntity(s, i) },
             groups = seed.appGroups.mapIndexed { i, g -> Mappers.toEntity(g, i) },
             labelGroups = seed.labelGroups.map { LabelGroupEntity(it.label, it.groupId) },
             alwaysAllowed = seed.alwaysAllowed.mapIndexed { i, p -> AlwaysAllowedEntity(p, i) },
             settings = Mappers.toSettingRows(seed.settings),
+            hiddenApps = seed.hiddenApps.mapIndexed { i, p -> HiddenAppEntity(p, i) },
         )
         assertEquals(seed, back)
         assertEquals(listOf(LabelGroup("banking", SeedConfig.BANKING)), back.labelGroups)

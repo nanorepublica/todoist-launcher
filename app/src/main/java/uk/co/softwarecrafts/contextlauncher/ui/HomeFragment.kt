@@ -33,7 +33,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import uk.co.softwarecrafts.contextlauncher.Graph
+import uk.co.softwarecrafts.contextlauncher.core.gate.AllowSource
 import uk.co.softwarecrafts.contextlauncher.core.gate.AllowedEntry
+import uk.co.softwarecrafts.contextlauncher.core.config.AppGroup
+import uk.co.softwarecrafts.contextlauncher.core.config.GroupKind
 import uk.co.softwarecrafts.contextlauncher.core.gate.TimedSession
 import uk.co.softwarecrafts.contextlauncher.core.stage.TaskSnapshot
 import uk.co.softwarecrafts.contextlauncher.core.todoist.TodayTasks
@@ -46,9 +49,9 @@ import java.util.Locale
 
 /**
  * The text-only home: current stage, clock, running timed session, today's
- * tasks and the apps this stage allows. Gestures: swipe up or right for the
+ * tasks and the apps this stage allows. Gestures: swipe up or left for the
  * app list, down for notifications, long-press for settings, double-tap to
- * lock. Swipe left is reserved for the filtered notification list (v2).
+ * lock. Swipe right is reserved for the filtered notification list (v2).
  */
 class HomeFragment : Fragment() {
 
@@ -58,6 +61,7 @@ class HomeFragment : Fragment() {
     private lateinit var viewModel: MainViewModel
     private var installed: Map<String, AppModel.App> = emptyMap()
     private var allowed: List<AllowedEntry> = emptyList()
+    private var unrestrictedGroups: List<AppGroup> = emptyList()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -123,6 +127,7 @@ class HomeFragment : Fragment() {
                         }
                     }
                     allowed = Graph.gate(requireContext()).allowed()
+                    unrestrictedGroups = Graph.config(requireContext()).load().groups(GroupKind.UNRESTRICTED)
                     renderApps()
                 }
             }
@@ -132,16 +137,30 @@ class HomeFragment : Fragment() {
     private fun renderApps() {
         val list = _binding?.appsList ?: return
         list.removeAllViews()
-        val rows = allowed.mapNotNull { entry -> installed[entry.packageName]?.let { entry to it } }
+        val stageRows = allowed.filter { it.source != AllowSource.UNRESTRICTED }
+            .mapNotNull { entry -> installed[entry.packageName]?.let { entry to it } }
             .sortedBy { (_, app) -> app.appLabel.lowercase() }
-        binding.tvAppsHeader.text = if (rows.isEmpty()) getString(R.string.apps_header_empty) else getString(R.string.apps_header)
-        rows.forEach { (entry, app) ->
-            list.addView(row(buildString {
-                append(app.appLabel)
-                entry.capMinutes?.let { append("  ·  ").append(getString(R.string.cap_minutes, it)) }
-            }) { launchAllowed(entry, app) })
+        binding.tvAppsHeader.text = if (stageRows.isEmpty()) getString(R.string.apps_header_empty) else getString(R.string.apps_header)
+        stageRows.forEach { (entry, app) -> list.addView(appRow(entry, app)) }
+
+        // Unrestricted groups, each under its own name
+        val unrestricted = allowed.filter { it.source == AllowSource.UNRESTRICTED }.associateBy { it.packageName }
+        unrestrictedGroups.forEach { group ->
+            val rows = group.apps.mapNotNull { a -> unrestricted[a.packageName]?.let { e -> installed[a.packageName]?.let { e to it } } }
+                .sortedBy { (_, app) -> app.appLabel.lowercase() }
+            if (rows.isEmpty()) return@forEach
+            list.addView(TextView(requireContext(), null, 0, R.style.TextSmallBold).apply {
+                text = group.name
+                setPadding(3.dpToPx(), 16.dpToPx(), 3.dpToPx(), 4.dpToPx())
+            })
+            rows.forEach { (entry, app) -> list.addView(appRow(entry, app)) }
         }
     }
+
+    private fun appRow(entry: AllowedEntry, app: AppModel.App): TextView = row(buildString {
+        append(app.appLabel)
+        entry.capMinutes?.let { append("  ·  ").append(getString(R.string.cap_minutes, it)) }
+    }) { launchAllowed(entry, app) }
 
     private fun launchAllowed(entry: AllowedEntry, app: AppModel.App) {
         val appContext = requireContext().applicationContext
@@ -255,9 +274,9 @@ class HomeFragment : Fragment() {
 
     private fun gestureListener(context: Context): View.OnTouchListener = object : OnSwipeTouchListener(context) {
         override fun onSwipeUp() = openAppList()
-        override fun onSwipeRight() = openAppList()
+        override fun onSwipeLeft() = openAppList()
         override fun onSwipeDown() = expandNotificationDrawer(context)
-        override fun onSwipeLeft() = Unit // reserved: filtered notifications (v2)
+        override fun onSwipeRight() = Unit // reserved: filtered notifications (v2)
         override fun onLongClick() {
             try {
                 findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)

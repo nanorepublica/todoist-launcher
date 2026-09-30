@@ -25,6 +25,9 @@ interface ConfigDao {
     @Query("SELECT * FROM settings")
     suspend fun settings(): List<SettingEntity>
 
+    @Query("SELECT * FROM hidden_apps ORDER BY sortOrder")
+    suspend fun hiddenApps(): List<HiddenAppEntity>
+
     @Query("SELECT COUNT(*) FROM stages")
     suspend fun stageCount(): Int
 
@@ -41,12 +44,14 @@ interface ConfigDao {
     @Query("DELETE FROM label_groups") suspend fun clearLabelGroups()
     @Query("DELETE FROM always_allowed") suspend fun clearAlwaysAllowed()
     @Query("DELETE FROM settings") suspend fun clearSettings()
+    @Query("DELETE FROM hidden_apps") suspend fun clearHiddenApps()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertStages(stages: List<StageEntity>)
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertGroups(groups: List<AppGroupEntity>)
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertLabelGroups(rows: List<LabelGroupEntity>)
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertAlwaysAllowed(rows: List<AlwaysAllowedEntity>)
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertSettings(rows: List<SettingEntity>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertHiddenApps(rows: List<HiddenAppEntity>)
 
     /** Replaces the whole configuration atomically. */
     @Transaction
@@ -56,10 +61,11 @@ interface ConfigDao {
         labelGroups: List<LabelGroupEntity>,
         alwaysAllowed: List<AlwaysAllowedEntity>,
         settings: List<SettingEntity>,
+        hiddenApps: List<HiddenAppEntity>,
     ) {
-        clearStages(); clearGroups(); clearLabelGroups(); clearAlwaysAllowed(); clearSettings()
+        clearStages(); clearGroups(); clearLabelGroups(); clearAlwaysAllowed(); clearSettings(); clearHiddenApps()
         insertStages(stages); insertGroups(groups); insertLabelGroups(labelGroups)
-        insertAlwaysAllowed(alwaysAllowed); insertSettings(settings)
+        insertAlwaysAllowed(alwaysAllowed); insertSettings(settings); insertHiddenApps(hiddenApps)
     }
 }
 

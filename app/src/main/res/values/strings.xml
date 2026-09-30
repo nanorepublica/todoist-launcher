@@ -68,7 +68,7 @@
     <string name="sync_todoist_now">Sync Todoist now</string>
     <string name="apps_header">Apps</string>
     <string name="apps_header_empty">No apps allowed in this stage</string>
-    <string name="home_hint">Swipe right for all apps · long-press for settings</string>
+    <string name="home_hint">Swipe left for all apps · long-press for settings</string>
     <string name="search_apps">Search apps</string>
     <string name="cap_minutes">%1$d min</string>
     <string name="capped_session_started">%1$s: %2$d min, then back here</string>
@@ -83,6 +83,17 @@
     <string name="friction_open">Open</string>
     <string name="friction_open_for">Open for %1$d min</string>
     <string name="cancel">Cancel</string>
+    <string name="app_hide">Hide (background app)</string>
+    <string name="app_occasional_on">Occasional: show only when searching</string>
+    <string name="app_occasional_off">Occasional: show in the list again</string>
+    <string name="app_unrestricted_on">Unrestricted: allow in every stage</string>
+    <string name="app_unrestricted_off">Unrestricted: stop allowing everywhere</string>
+    <string name="app_hidden_toast">%1$s hidden. Unhide from Settings > Context > Hidden apps.</string>
+    <string name="app_group_updated">%1$s: %2$s</string>
+    <string name="hidden_apps_row">Hidden apps</string>
+    <string name="hidden_apps_none">No hidden apps</string>
+    <string name="hidden_apps_tap">Tap an app to unhide it</string>
+    <string name="app_unhidden">%1$s is visible again</string>
     <string name="onboarding_step_enforce">6. Time\'s up enforcement</string>
     <string name="onboarding_enforce_why">When a time limit runs out, the launcher brings you back here. That needs the accessibility service, which only watches which app is in front. On Android 13+ a sideloaded app must first be allowed restricted settings: App info > three dots > Allow restricted settings.</string>
     <string name="onboarding_open_accessibility">Open accessibility settings</string>

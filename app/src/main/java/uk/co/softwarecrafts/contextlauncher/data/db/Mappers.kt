@@ -3,6 +3,7 @@ package uk.co.softwarecrafts.contextlauncher.data.db
 import uk.co.softwarecrafts.contextlauncher.core.config.AppGroup
 import uk.co.softwarecrafts.contextlauncher.core.config.ConfigJson
 import uk.co.softwarecrafts.contextlauncher.core.config.GeneralSettings
+import uk.co.softwarecrafts.contextlauncher.core.config.GroupKind
 import uk.co.softwarecrafts.contextlauncher.core.config.LabelGroup
 import uk.co.softwarecrafts.contextlauncher.core.config.LauncherConfig
 import uk.co.softwarecrafts.contextlauncher.core.config.Perk
@@ -45,9 +46,12 @@ object Mappers {
     )
 
     fun toEntity(group: AppGroup, sortOrder: Int) =
-        AppGroupEntity(id = group.id, name = group.name, apps = ConfigJson.encodeApps(group.apps), sortOrder = sortOrder)
+        AppGroupEntity(id = group.id, name = group.name, apps = ConfigJson.encodeApps(group.apps), sortOrder = sortOrder, kind = group.kind.name)
 
-    fun toGroup(row: AppGroupEntity) = AppGroup(id = row.id, name = row.name, apps = ConfigJson.decodeApps(row.apps))
+    fun toGroup(row: AppGroupEntity) = AppGroup(
+        id = row.id, name = row.name, apps = ConfigJson.decodeApps(row.apps),
+        kind = runCatching { GroupKind.valueOf(row.kind) }.getOrDefault(GroupKind.NORMAL),
+    )
 
     fun toSettingRows(settings: GeneralSettings): List<SettingEntity> =
         listOf(SettingEntity(KEY_CALENDAR_NAME, settings.calendarName))
@@ -63,11 +67,13 @@ object Mappers {
         labelGroups: List<LabelGroupEntity>,
         alwaysAllowed: List<AlwaysAllowedEntity>,
         settings: List<SettingEntity>,
+        hiddenApps: List<HiddenAppEntity> = emptyList(),
     ) = LauncherConfig(
         stages = stages.map(::toStage),
         appGroups = groups.map(::toGroup),
         labelGroups = labelGroups.map { LabelGroup(it.label, it.groupId) },
         alwaysAllowed = alwaysAllowed.map { it.packageName },
+        hiddenApps = hiddenApps.map { it.packageName },
         settings = toSettings(settings),
     )
 

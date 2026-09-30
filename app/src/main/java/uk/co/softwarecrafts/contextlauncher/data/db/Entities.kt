@@ -1,5 +1,6 @@
 package uk.co.softwarecrafts.contextlauncher.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -34,6 +35,15 @@ data class AppGroupEntity(
     val name: String,
     /** JSON list of core AllowedApp. */
     val apps: String,
+    val sortOrder: Int,
+    /** core GroupKind name. */
+    @ColumnInfo(defaultValue = "NORMAL") val kind: String = "NORMAL",
+)
+
+/** Background-only apps that never appear in the app list. */
+@Entity(tableName = "hidden_apps")
+data class HiddenAppEntity(
+    @PrimaryKey val packageName: String,
     val sortOrder: Int,
 )
 

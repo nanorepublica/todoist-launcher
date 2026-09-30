@@ -21,11 +21,13 @@ import androidx.room.RoomDatabase
         EventEntity::class,
         TaskEntity::class,
         SyncStateEntity::class,
+        HiddenAppEntity::class,
     ],
     version = AppDatabase.VERSION,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2), // tasks + sync_state tables
+        AutoMigration(from = 2, to = 3), // app_groups.kind, hidden_apps table
     ],
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -34,7 +36,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
 
     companion object {
-        const val VERSION = 2
+        const val VERSION = 3
         const val NAME = "context_launcher.db"
 
         fun build(context: Context): AppDatabase =

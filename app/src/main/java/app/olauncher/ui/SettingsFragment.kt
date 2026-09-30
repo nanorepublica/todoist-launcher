@@ -98,6 +98,7 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
             R.id.setLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.runSetup -> findNavController().navigate(R.id.action_settingsFragment_to_onboardingFragment)
             R.id.syncTodoist -> syncTodoistNow()
+            R.id.hiddenApps -> showHiddenAppsDialog()
             R.id.exportConfig -> configTransfer.export()
             R.id.importConfig -> showDialog(
                 requireContext().createDialog(
@@ -138,6 +139,7 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
         binding.setLauncher.setOnClickListener(this)
         binding.runSetup.setOnClickListener(this)
         binding.syncTodoist.setOnClickListener(this)
+        binding.hiddenApps.setOnClickListener(this)
         binding.exportConfig.setOnClickListener(this)
         binding.importConfig.setOnClickListener(this)
         binding.resetConfig.setOnClickListener(this)
@@ -211,6 +213,38 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
     }
 
     // Dialogs
+
+    private fun showHiddenAppsDialog() {
+        val ctx = requireContext()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val hidden = uk.co.softwarecrafts.contextlauncher.Graph.config(ctx.applicationContext).load().hiddenApps
+            if (hidden.isEmpty()) {
+                ctx.showToast(getString(R.string.hidden_apps_none))
+                return@launch
+            }
+            val pm = ctx.packageManager
+            val d = ctx.createDialog(title = R.string.hidden_apps_row, action = R.string.close, message = R.string.hidden_apps_tap) { container ->
+                android.widget.LinearLayout(container.context).apply {
+                    orientation = android.widget.LinearLayout.VERTICAL
+                    hidden.forEach { pkg ->
+                        val label = runCatching { pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString() }.getOrDefault(pkg)
+                        addView(android.widget.TextView(context, null, 0, R.style.TextSmall).apply {
+                            text = label
+                            setPadding(24, 20, 24, 20)
+                            setOnClickListener {
+                                dialog?.dismiss()
+                                viewLifecycleOwner.lifecycleScope.launch {
+                                    uk.co.softwarecrafts.contextlauncher.Graph.config(ctx.applicationContext).setHidden(pkg, false)
+                                    ctx.showToast(getString(R.string.app_unhidden, label))
+                                }
+                            }
+                        })
+                    }
+                }
+            }
+            showDialog(d)
+        }
+    }
 
     private fun syncTodoistNow() {
         val ctx = requireContext().applicationContext

@@ -33,6 +33,8 @@ import app.olauncher.helper.uninstall
 import kotlinx.coroutines.launch
 import uk.co.softwarecrafts.contextlauncher.Graph
 import uk.co.softwarecrafts.contextlauncher.core.gate.AllowedEntry
+import uk.co.softwarecrafts.contextlauncher.core.config.GroupKind
+import uk.co.softwarecrafts.contextlauncher.core.config.SeedConfig
 import uk.co.softwarecrafts.contextlauncher.core.gate.Decision
 import java.text.Normalizer
 
@@ -50,6 +52,9 @@ class AppListFragment : Fragment() {
     private val adapter = AppAdapter(::onAppTapped, ::onAppLongPressed)
     private var apps: List<AppModel.App> = emptyList()
     private var allowed: Map<String, AllowedEntry> = emptyMap()
+    private var hidden: Set<String> = emptySet()
+    private var occasional: Set<String> = emptySet()
+    private var unrestricted: Set<String> = emptySet()
     private var lastAutoLaunchQuery: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -72,6 +77,7 @@ class AppListFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 Graph.stageEngine(requireContext()).state.collect {
                     allowed = Graph.gate(requireContext()).allowed().associateBy { it.packageName }
+                    loadClasses()
                     refresh()
                 }
             }
@@ -95,9 +101,17 @@ class AppListFragment : Fragment() {
         super.onStop()
     }
 
+    private suspend fun loadClasses() {
+        val cfg = Graph.config(requireContext()).load()
+        hidden = cfg.hiddenApps.toSet()
+        occasional = cfg.packagesIn(GroupKind.OCCASIONAL)
+        unrestricted = cfg.packagesIn(GroupKind.UNRESTRICTED)
+    }
+
     private fun refresh() {
         val query = binding.search.text?.toString().orEmpty()
-        val matching = if (query.isBlank()) apps else apps.filter { matches(it.appLabel, query) }
+        val visible = apps.filter { it.appPackage !in hidden && (query.isNotBlank() || it.appPackage !in occasional) }
+        val matching = if (query.isBlank()) visible else visible.filter { matches(it.appLabel, query) }
         adapter.submit(matching.map { AppRow(it, allowed[it.appPackage], allowed.isEmpty() || it.appPackage in allowed) })
         if (query.isNotBlank() && !query.startsWith(" ") && matching.size == 1 && lastAutoLaunchQuery != query) {
             lastAutoLaunchQuery = query
@@ -149,13 +163,34 @@ class AppListFragment : Fragment() {
 
     private fun onAppLongPressed(row: AppRow, anchor: View) {
         val app = row.app
+        val pkg = app.appPackage
         anchor.showPopupMenu(configure = { menu ->
             menu.add(Menu.NONE, 1, 1, getString(R.string.info))
-            if (!requireContext().isSystemApp(app.appPackage, app.user)) menu.add(Menu.NONE, 2, 2, getString(R.string.delete))
+            menu.add(Menu.NONE, 3, 3, getString(R.string.app_hide))
+            menu.add(Menu.NONE, 4, 4, getString(if (pkg in occasional) R.string.app_occasional_off else R.string.app_occasional_on))
+            menu.add(Menu.NONE, 5, 5, getString(if (pkg in unrestricted) R.string.app_unrestricted_off else R.string.app_unrestricted_on))
+            if (!requireContext().isSystemApp(pkg, app.user)) menu.add(Menu.NONE, 2, 2, getString(R.string.delete))
         }) { item ->
+            val appContext = requireContext().applicationContext
             when (item.itemId) {
-                1 -> openAppInfo(requireContext(), app.user, app.appPackage)
-                2 -> requireContext().uninstall(app.appPackage)
+                1 -> openAppInfo(requireContext(), app.user, pkg)
+                2 -> requireContext().uninstall(pkg)
+                3 -> viewLifecycleOwner.lifecycleScope.launch {
+                    Graph.config(appContext).setHidden(pkg, true)
+                    appContext.showToast(getString(R.string.app_hidden_toast, app.appLabel))
+                    loadClasses(); refresh()
+                }
+                4 -> viewLifecycleOwner.lifecycleScope.launch {
+                    val member = Graph.config(appContext).toggleKindGroup(pkg, GroupKind.OCCASIONAL, SeedConfig.OCCASIONAL, "Occasional")
+                    appContext.showToast(getString(R.string.app_group_updated, app.appLabel, if (member) "occasional" else "back in the list"))
+                    loadClasses(); refresh()
+                }
+                5 -> viewLifecycleOwner.lifecycleScope.launch {
+                    val member = Graph.config(appContext).toggleKindGroup(pkg, GroupKind.UNRESTRICTED, SeedConfig.UNRESTRICTED, "Unrestricted")
+                    appContext.showToast(getString(R.string.app_group_updated, app.appLabel, if (member) "unrestricted" else "restricted again"))
+                    Graph.stageEngine(appContext).refresh()
+                    loadClasses(); refresh()
+                }
             }
         }
     }
