@@ -57,6 +57,10 @@ core/                           standalone Gradle build, pure Kotlin/JVM
     stage/Inputs.kt             CalendarEvent, TaskSnapshot
     stage/Resolution.kt         Activation, ActivePerk, Resolution
     stage/DefaultSchedule.kt    weekly blocks onboarding writes to the calendar
+    todoist/TodoistModels.kt    API v1 wire shapes (items, labels, commands)
+    todoist/TodoistMapper.kt    due-date parsing in the user's zone -> TaskSnapshot
+    todoist/TaskCache.kt        pure merge rules for full/incremental sync
+    todoist/TodayTasks.kt       home-screen rows: gating first, then overdue
   src/test/kotlin/.../core/
     FakeClock.kt                settable clock for tests
 app/                            Android app (Olauncher fork)
@@ -74,6 +78,10 @@ app/                            Android app (Olauncher fork)
     engine/StageEngine.kt       StateFlow<StageState>; re-resolves on resume,
                                 calendar change and at nextChangeAt
     data/AppPrefs.kt            non-exportable flags (onboardingDone)
+    data/todoist/TodoistApi.kt  OkHttp calls: sync, completed-by-date, labels, quick add
+    data/todoist/TodoistRepository.kt  cache in Room, complete/quick-add, is the engine's TaskSource
+    data/todoist/TokenStore.kt  EncryptedSharedPreferences (todoist_secure, backup-excluded)
+    data/todoist/TodoistSyncWorker.kt  15-minute WorkManager refresh
   src/main/java/app/olauncher/  borrowed Olauncher code, package kept as-is
     MainActivity.kt             single activity, nav host, back handling
     MainViewModel.kt            app list, launching, home apps, screen time
@@ -147,8 +155,10 @@ included build. `core/settings.gradle` reuses the root version catalog.
    fake-clock tests; stage line on the home screen; onboarding (default
    launcher, calendar permission, create or pick the stage calendar, seed
    the default schedule).
-3. Todoist: unified API v1, incremental `/sync`, offline cache, complete from
-   launcher, 15-minute WorkManager refresh.
+3. Todoist (done): unified API v1, incremental `/sync` with a stored sync
+   token, offline cache in Room (`tasks`, `sync_state`), complete from the
+   home screen via `item_close`, quick add, 15-minute WorkManager refresh
+   plus a sync on every launcher resume (60 s throttle), token step in Setup.
 4. Home and gating: text-only home, greyed off-list apps in search, friction
    screen, countdown escalation, accessibility-driven return to home.
 5. Voice actions: speak (on-device SpeechRecognizer) and add task (Ramble
@@ -169,6 +179,13 @@ included build. `core/settings.gradle` reuses the root version catalog.
 - Task-linked app groups: only tasks due today or overdue unlock their group.
 - Weekly review "falls due": due date is today or earlier; if the task has a
   time, that time has passed.
+- Stage labels are `phone/morning`, `phone/kidsdown`, `phone/review` (the
+  spec's `ph_` prefix was replaced at the user's request). Labels the config
+  refers to are created in Todoist on the first full sync if missing.
+- A full sync omits completed items, so the repository also fetches today's
+  completions from `/tasks/completed/by_completion_date`; incremental syncs
+  carry completions as `checked` items. Completing from the launcher is
+  optimistic and reverted on failure.
 - A task stage with no tasks carrying its label today simply runs its
   calendar block; "done" needs at least one such task, all complete.
 - The stage calendar is identified by display name (portable in the config
