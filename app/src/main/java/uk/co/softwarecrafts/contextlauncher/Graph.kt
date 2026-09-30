@@ -7,6 +7,9 @@ import uk.co.softwarecrafts.contextlauncher.core.SystemClock
 import uk.co.softwarecrafts.contextlauncher.data.ConfigRepository
 import uk.co.softwarecrafts.contextlauncher.data.EventLogRepository
 import uk.co.softwarecrafts.contextlauncher.data.db.AppDatabase
+import uk.co.softwarecrafts.contextlauncher.data.todoist.TodoistApi
+import uk.co.softwarecrafts.contextlauncher.data.todoist.TodoistRepository
+import uk.co.softwarecrafts.contextlauncher.data.todoist.TokenStore
 import uk.co.softwarecrafts.contextlauncher.engine.StageEngine
 
 /**
@@ -17,6 +20,7 @@ import uk.co.softwarecrafts.contextlauncher.engine.StageEngine
 object Graph {
     @Volatile private var database: AppDatabase? = null
     @Volatile private var engine: StageEngine? = null
+    @Volatile private var todoist: TodoistRepository? = null
 
     val clock: Clock = SystemClock()
 
@@ -30,6 +34,7 @@ object Graph {
         synchronized(this) {
             engine?.close()
             engine = null
+            todoist = null
             database?.close()
             database = null
         }
@@ -47,6 +52,22 @@ object Graph {
                 config = config(context),
                 eventLog = eventLog(context),
                 calendar = calendar(context),
-            ).also { engine = it }
+            ).also { created ->
+                engine = created
+                created.taskSource = todoist(context)
+            }
+        }
+
+    fun todoist(context: Context): TodoistRepository =
+        todoist ?: synchronized(this) {
+            todoist ?: TodoistRepository(
+                api = TodoistApi(),
+                tokens = TokenStore(context.applicationContext),
+                dao = db(context).taskDao(),
+                config = config(context),
+                eventLog = eventLog(context),
+                clock = clock,
+                onTasksChanged = { engine?.refresh() },
+            ).also { todoist = it }
         }
 }

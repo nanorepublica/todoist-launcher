@@ -67,6 +67,10 @@ dependencies {
     // Room database
     implementation libs.room.runtime
     ksp libs.room.compiler
+
+    // Todoist: HTTP client and encrypted token storage
+    implementation libs.okhttp
+    implementation libs.security.crypto
     implementation libs.kotlin.stdlib
     implementation libs.core.ktx
     implementation libs.appcompat

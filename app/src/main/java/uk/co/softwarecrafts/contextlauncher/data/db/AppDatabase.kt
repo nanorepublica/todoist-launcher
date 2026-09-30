@@ -1,6 +1,7 @@
 package uk.co.softwarecrafts.contextlauncher.data.db
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -18,16 +19,22 @@ import androidx.room.RoomDatabase
         AlwaysAllowedEntity::class,
         SettingEntity::class,
         EventEntity::class,
+        TaskEntity::class,
+        SyncStateEntity::class,
     ],
     version = AppDatabase.VERSION,
     exportSchema = true,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2), // tasks + sync_state tables
+    ],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun configDao(): ConfigDao
     abstract fun eventDao(): EventDao
+    abstract fun taskDao(): TaskDao
 
     companion object {
-        const val VERSION = 1
+        const val VERSION = 2
         const val NAME = "context_launcher.db"
 
         fun build(context: Context): AppDatabase =

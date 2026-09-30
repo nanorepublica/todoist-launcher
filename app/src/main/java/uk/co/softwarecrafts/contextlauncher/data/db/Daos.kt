@@ -79,3 +79,29 @@ interface EventDao {
     @Query("DELETE FROM events WHERE at < :beforeMillis")
     suspend fun deleteBefore(beforeMillis: Long): Int
 }
+
+@Dao
+interface TaskDao {
+    @Query("SELECT * FROM tasks")
+    suspend fun all(): List<TaskEntity>
+
+    @Query("SELECT * FROM tasks")
+    fun observe(): Flow<List<TaskEntity>>
+
+    @Query("DELETE FROM tasks") suspend fun clear()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertAll(rows: List<TaskEntity>)
+
+    @Transaction
+    suspend fun replaceAll(rows: List<TaskEntity>) {
+        clear()
+        insertAll(rows)
+    }
+
+    @Query("SELECT value FROM sync_state WHERE `key` = :key")
+    suspend fun state(key: String): String?
+
+    @Upsert suspend fun putState(row: SyncStateEntity)
+
+    @Query("DELETE FROM sync_state") suspend fun clearState()
+}

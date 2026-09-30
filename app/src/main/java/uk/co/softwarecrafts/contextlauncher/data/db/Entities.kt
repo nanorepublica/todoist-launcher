@@ -69,3 +69,20 @@ data class EventEntity(
     val bypassNumber: Int?,
     val detail: String?,
 )
+
+/** Cached Todoist item: the raw API JSON plus two queryable columns. */
+@Entity(tableName = "tasks", indices = [Index("dueDate"), Index("completed")])
+data class TaskEntity(
+    @PrimaryKey val id: String,
+    val json: String,
+    /** "YYYY-MM-DD" in the user's zone, null when undated. */
+    val dueDate: String?,
+    val completed: Boolean,
+)
+
+/** Todoist sync bookkeeping (sync token, last sync time). Not exported with the config. */
+@Entity(tableName = "sync_state")
+data class SyncStateEntity(
+    @PrimaryKey val key: String,
+    val value: String,
+)
