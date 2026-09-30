@@ -10,6 +10,9 @@ navigationFragmentKtx = "2.9.0"
 recyclerview = "1.4.0"
 workRuntimeKtx = "2.10.1"
 junit = "4.13.2"
+ksp = "2.1.20-2.0.1"
+room = "2.8.5"
+kotlinxSerialization = "1.9.0"
 [libraries]
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -23,5 +26,11 @@ navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-kt
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+kotlin-serialization-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlinStdlib" }
+ksp-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlinStdlib" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinStdlib" }

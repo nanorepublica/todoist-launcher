@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.google.devtools.ksp'
 
 android {
     compileSdk 36
@@ -48,9 +49,19 @@ android {
     namespace 'app.olauncher'
 }
 
+// Room writes its schema JSON here on every build; commit it (it is the
+// migration history, like Django's migrations directory).
+ksp {
+    arg('room.schemaLocation', "$projectDir/schemas")
+}
+
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'uk.co.softwarecrafts:core'
+
+    // Room database
+    implementation libs.room.runtime
+    ksp libs.room.compiler
     implementation libs.kotlin.stdlib
     implementation libs.core.ktx
     implementation libs.appcompat
