@@ -89,12 +89,21 @@
                     android:textColor="?attr/primaryColor" />
 
                 <TextView
-                    android:id="@+id/exportConfig"
+                    android:id="@+id/runSetup"
                     style="@style/TextSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="12dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/run_setup" />
+
+                <TextView
+                    android:id="@+id/exportConfig"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
                     android:paddingVertical="8dp"
                     android:text="@string/export_config" />
 

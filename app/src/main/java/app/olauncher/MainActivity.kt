@@ -38,6 +38,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import uk.co.softwarecrafts.contextlauncher.Graph
+import uk.co.softwarecrafts.contextlauncher.data.AppPrefs
 
 class MainActivity : AppCompatActivity() {
 
@@ -125,6 +126,7 @@ class MainActivity : AppCompatActivity() {
         isResumed = true
         viewModel.isPrivateSpaceToggling = false
         viewModel.getAppList()
+        showOnboardingIfNeeded()
     }
 
     private fun registerShortcutCallback() {
@@ -221,6 +223,12 @@ class MainActivity : AppCompatActivity() {
             return
         // In Android 8.0, windowIsTranslucent cannot be used with screenOrientation=portrait
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
+
+    private fun showOnboardingIfNeeded() {
+        if (AppPrefs(this).onboardingDone) return
+        if (navController.currentDestination?.id == R.id.mainFragment)
+            navController.navigate(R.id.action_mainFragment_to_onboardingFragment)
     }
 
     private fun backToHomeScreen() {

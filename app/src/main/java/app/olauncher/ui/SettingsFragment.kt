@@ -99,6 +99,7 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
             R.id.screenTimeOnOff -> viewModel.showDialog.postValue(Constants.Dialog.DIGITAL_WELLBEING)
             R.id.appInfo -> openAppInfo(requireContext(), Process.myUserHandle(), BuildConfig.APPLICATION_ID)
             R.id.setLauncher -> viewModel.resetLauncherLiveData.call()
+            R.id.runSetup -> findNavController().navigate(R.id.action_settingsFragment_to_onboardingFragment)
             R.id.exportConfig -> configTransfer.export()
             R.id.importConfig -> showDialog(
                 requireContext().createDialog(
@@ -149,6 +150,7 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
         binding.olauncherHiddenApps.setOnClickListener(this)
         binding.appInfo.setOnClickListener(this)
         binding.setLauncher.setOnClickListener(this)
+        binding.runSetup.setOnClickListener(this)
         binding.exportConfig.setOnClickListener(this)
         binding.importConfig.setOnClickListener(this)
         binding.resetConfig.setOnClickListener(this)

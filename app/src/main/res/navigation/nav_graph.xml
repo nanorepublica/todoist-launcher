@@ -18,6 +18,13 @@
             app:popEnterAnim="@anim/slide_in_top"
             app:popExitAnim="@anim/fade_exit" />
         <action
+            android:id="@+id/action_mainFragment_to_onboardingFragment"
+            app:destination="@id/onboardingFragment"
+            app:enterAnim="@anim/fade_enter"
+            app:exitAnim="@anim/fade_exit"
+            app:popEnterAnim="@anim/fade_enter"
+            app:popExitAnim="@anim/fade_exit" />
+        <action
             android:id="@+id/action_mainFragment_to_settingsFragment"
             app:destination="@id/settingsFragment"
             app:enterAnim="@anim/fade_enter"
@@ -47,6 +54,13 @@
         android:label="SettingsFragment"
         android:layout="@layout/fragment_settings">
         <action
+            android:id="@+id/action_settingsFragment_to_onboardingFragment"
+            app:destination="@id/onboardingFragment"
+            app:enterAnim="@anim/fade_enter"
+            app:exitAnim="@anim/fade_exit"
+            app:popEnterAnim="@anim/fade_enter"
+            app:popExitAnim="@anim/fade_exit" />
+        <action
             android:id="@+id/action_settingsFragment_to_appListFragment"
             app:destination="@id/appListFragment"
             app:enterAnim="@anim/fade_enter"
@@ -54,5 +68,11 @@
             app:popEnterAnim="@anim/fade_enter"
             app:popExitAnim="@anim/fade_exit" />
     </fragment>
+
+    <fragment
+        android:id="@+id/onboardingFragment"
+        android:name="uk.co.softwarecrafts.contextlauncher.ui.OnboardingFragment"
+        android:label="OnboardingFragment"
+        tools:layout="@layout/fragment_onboarding" />
 
 </navigation>
