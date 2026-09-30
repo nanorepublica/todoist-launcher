@@ -45,8 +45,8 @@ object SeedConfig {
         stages = listOf(
             Stage(
                 id = "weekly_review", name = "Weekly review",
-                trigger = StageTrigger.TaskDue("ph_review"), rank = 100,
-                doneLabel = "ph_review", maxBypassMinutes = 5,
+                trigger = StageTrigger.TaskDue("phone/review"), rank = 100,
+                doneLabel = "phone/review", maxBypassMinutes = 5,
                 allowedGroups = listOf(ESSENTIALS),
             ),
             Stage(
@@ -57,7 +57,7 @@ object SeedConfig {
             Stage(
                 id = "kids_bedtime", name = "Kids' bedtime",
                 trigger = StageTrigger.Calendar("Kids' bedtime"), rank = 85,
-                doneLabel = "ph_kidsdown", maxBypassMinutes = 5,
+                doneLabel = "phone/kidsdown", maxBypassMinutes = 5,
                 allowedGroups = listOf(ESSENTIALS),
             ),
             Stage(
@@ -73,13 +73,13 @@ object SeedConfig {
             Stage(
                 id = "morning_routine", name = "Morning routine",
                 trigger = StageTrigger.Calendar("Morning routine"), rank = 70,
-                doneLabel = "ph_morning", maxBypassMinutes = 5,
+                doneLabel = "phone/morning", maxBypassMinutes = 5,
                 allowedGroups = listOf(ESSENTIALS),
                 onDonePerk = Perk(GAMES, minutes = 10),
             ),
             Stage(
                 id = "after_bedtime", name = "After bedtime",
-                trigger = StageTrigger.TasksDone("ph_kidsdown", until = LocalTime.of(21, 0)), rank = 60,
+                trigger = StageTrigger.TasksDone("phone/kidsdown", until = LocalTime.of(21, 0)), rank = 60,
                 maxBypassMinutes = 5, allowedGroups = listOf(ESSENTIALS, EVENING),
             ),
             Stage(

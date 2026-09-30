@@ -34,12 +34,12 @@ class StageResolverTest {
     )
 
     private fun morningTask(date: LocalDate, done: Boolean, doneAt: LocalTime? = null) = TaskSnapshot(
-        id = "m1", content = "Exercise", labels = setOf("ph_morning"), due = date,
+        id = "m1", content = "Exercise", labels = setOf("phone/morning"), due = date,
         completed = done, completedAt = doneAt?.let { at(date, it) },
     )
 
     private fun kidsDown(date: LocalDate, done: Boolean, doneAt: LocalTime? = null) = TaskSnapshot(
-        id = "k1", content = "Kids down", labels = setOf("ph_kidsdown"), due = date,
+        id = "k1", content = "Kids down", labels = setOf("phone/kidsdown"), due = date,
         completed = done, completedAt = doneAt?.let { at(date, it) },
     )
 
@@ -148,7 +148,7 @@ class StageResolverTest {
 
     @Test
     fun `review task falling due forces the review stage over everything`() {
-        val review = TaskSnapshot("r1", "Weekly review", setOf("ph_review"), due = wednesday, dueTime = LocalTime.of(10, 0))
+        val review = TaskSnapshot("r1", "Weekly review", setOf("phone/review"), due = wednesday, dueTime = LocalTime.of(10, 0))
         val before = resolve(clockAt(wednesday, 9, 30), weekdayEvents(wednesday), listOf(review))
         assertEquals("work_am", before.stage.id)
         assertEquals(at(wednesday, LocalTime.of(10, 0)), before.nextChangeAt)
@@ -163,7 +163,7 @@ class StageResolverTest {
 
     @Test
     fun `review task due without a time is due from the start of the day, and overdue ones stay due`() {
-        val undated = TaskSnapshot("r1", "Weekly review", setOf("ph_review"), due = wednesday)
+        val undated = TaskSnapshot("r1", "Weekly review", setOf("phone/review"), due = wednesday)
         assertEquals("weekly_review", resolve(clockAt(wednesday, 0, 30), emptyList(), listOf(undated)).stage.id)
         val overdue = undated.copy(due = wednesday.minusDays(3))
         assertEquals("weekly_review", resolve(clockAt(wednesday, 15), weekdayEvents(wednesday), listOf(overdue)).stage.id)

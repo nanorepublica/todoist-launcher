@@ -47,7 +47,7 @@ class ConfigJsonTest {
 
     @Test
     fun `column codecs round trip`() {
-        val trigger = StageTrigger.TasksDone("ph_kidsdown", LocalTime.of(21, 0))
+        val trigger = StageTrigger.TasksDone("phone/kidsdown", LocalTime.of(21, 0))
         assertEquals(trigger, ConfigJson.decodeTrigger(ConfigJson.encodeTrigger(trigger)))
         val apps = listOf(AllowedApp("a"), AllowedApp("b", 15))
         assertEquals(apps, ConfigJson.decodeApps(ConfigJson.encodeApps(apps)))
