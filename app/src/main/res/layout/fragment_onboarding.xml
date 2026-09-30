@@ -254,6 +254,46 @@
             style="@style/SetupButton"
             android:text="@string/onboarding_allow_notifications" />
 
+        <!-- Step 7: voice -->
+        <TextView
+            style="@style/TextMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/onboarding_step_voice"
+            android:textColor="?attr/primaryColor" />
+
+        <TextView
+            style="@style/TextSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/onboarding_voice_why" />
+
+        <TextView
+            android:id="@+id/stepMicStatus"
+            style="@style/TextSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/onboarding_mic_off" />
+
+        <TextView
+            android:id="@+id/voiceAllowMic"
+            style="@style/SetupButton"
+            android:text="@string/onboarding_allow_mic" />
+
+        <TextView
+            android:id="@+id/stepVoiceChecks"
+            style="@style/TextSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" />
+
+        <TextView
+            android:id="@+id/voiceSpeechSettings"
+            style="@style/SetupButton"
+            android:text="@string/onboarding_open_speech_settings" />
+
         <TextView
             android:id="@+id/finish"
             style="@style/SetupButton"

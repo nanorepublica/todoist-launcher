@@ -28,6 +28,7 @@ import uk.co.softwarecrafts.contextlauncher.Graph
 import uk.co.softwarecrafts.contextlauncher.calendar.CalendarStore
 import uk.co.softwarecrafts.contextlauncher.core.stage.DefaultSchedule
 import uk.co.softwarecrafts.contextlauncher.data.AppPrefs
+import uk.co.softwarecrafts.contextlauncher.voice.Ramble
 import uk.co.softwarecrafts.contextlauncher.data.todoist.SyncStatus
 import uk.co.softwarecrafts.contextlauncher.data.todoist.TodoistSyncWorker
 import app.olauncher.helper.hideKeyboard
@@ -57,6 +58,7 @@ class OnboardingFragment : Fragment() {
     private var pickerDialog: OlDialog? = null
 
     private val requestNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { refreshStatus() }
+    private val requestMic = registerForActivityResult(ActivityResultContracts.RequestPermission()) { refreshStatus() }
 
     private val requestCalendar = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         val granted = result.values.all { it }
@@ -90,6 +92,11 @@ class OnboardingFragment : Fragment() {
         binding.todoistForget.setOnClickListener { forgetTodoistToken() }
         binding.enforceAccessibility.setOnClickListener { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
         binding.enforceNotifications.setOnClickListener { requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS) }
+        binding.voiceAllowMic.setOnClickListener { requestMic.launch(Manifest.permission.RECORD_AUDIO) }
+        binding.voiceSpeechSettings.setOnClickListener {
+            runCatching { startActivity(Intent("com.android.settings.action.SPEECH_RECOGNITION_SETTINGS")) }
+                .recoverCatching { startActivity(Intent(Settings.ACTION_VOICE_INPUT_SETTINGS)) }
+        }
 
         binding.stepScheduleList.text = DefaultSchedule.blocks.joinToString("\n") { block ->
             val days = if (block.days.contains(DayOfWeek.SATURDAY)) "Sat, Sun" else "Mon to Fri"
@@ -152,6 +159,30 @@ class OnboardingFragment : Fragment() {
         val notifyOn = ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         binding.stepNotifyStatus.text = getString(if (notifyOn) R.string.onboarding_notifications_on else R.string.onboarding_notifications_off)
         binding.enforceNotifications.setActive(!notifyOn)
+        refreshVoiceStatus(ctx)
+    }
+
+    private fun refreshVoiceStatus(ctx: android.content.Context) {
+        val micOn = ContextCompat.checkSelfPermission(ctx, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        binding.stepMicStatus.text = getString(if (micOn) R.string.onboarding_mic_on else R.string.onboarding_mic_off)
+        binding.voiceAllowMic.setActive(!micOn)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val onDevice = runCatching { android.speech.SpeechRecognizer.isOnDeviceRecognitionAvailable(ctx) }.getOrDefault(false)
+            val claudePackage = withContext(Dispatchers.IO) { Graph.config(ctx).load().settings.claudePackage }
+            val claudeInstalled = runCatching { ctx.packageManager.getPackageInfo(claudePackage, 0) }.isSuccess
+            val shortcuts = withContext(Dispatchers.IO) { Ramble.todoistShortcuts(ctx) }
+            val ramble = shortcuts.firstOrNull { it.id.contains("ramble", true) || it.label.contains("ramble", true) }
+            if (_binding == null) return@launch
+            binding.stepVoiceChecks.text = buildString {
+                append(getString(if (onDevice) R.string.onboarding_ondevice_yes else R.string.onboarding_ondevice_no)).append("\n")
+                append(if (claudeInstalled) getString(R.string.onboarding_claude_yes, claudePackage) else getString(R.string.onboarding_claude_no)).append("\n")
+                when {
+                    ramble != null -> append(getString(R.string.onboarding_ramble_yes, ramble.label))
+                    shortcuts.isEmpty() -> append(getString(R.string.onboarding_shortcuts_none))
+                    else -> append(getString(R.string.onboarding_shortcuts, shortcuts.joinToString { it.label }))
+                }
+            }
+        }
     }
 
     private fun refreshTodoistStatus() {

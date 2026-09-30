@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <!--"Time's up" fallback notification when the accessibility service is off-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!--"speak": on-device transcription, audio is never stored-->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="PackageVisibilityPolicy,QueryAllPackagesPermission" />

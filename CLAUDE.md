@@ -61,6 +61,7 @@ core/                           standalone Gradle build, pure Kotlin/JVM
     todoist/TodoistMapper.kt    due-date parsing in the user's zone -> TaskSnapshot
     todoist/TaskCache.kt        pure merge rules for full/incremental sync
     todoist/TodayTasks.kt       home-screen rows: gating first, then overdue
+    voice/Destinations.kt       which speak destinations a stage offers
     gate/AllowedApps.kt         Gatekeeper: allowlist for a resolution + launch decision
     gate/Escalation.kt          0/10/15/30 s ladder, per-block BypassCounter, limit options
     gate/TimedSession.kt        one running timed session + SessionRules for enforcement
@@ -80,6 +81,8 @@ app/                            Android app (Olauncher fork)
     ui/HomeFragment.kt          text-only home: stage, clock, session, tasks, allowed apps
     ui/AppListFragment.kt       searchable app list; off-list apps greyed, gated on tap
     ui/FrictionFragment.kt      bypass screen: reason, time-limit pills, countdown
+    ui/SpeakFragment.kt         speech capture and routing (task / Claude / copy)
+    voice/Ramble.kt             Todoist shortcut discovery and launch
     gate/GateController.kt      decisions, session + bypass counter (persisted), enforcement
     calendar/CalendarStore.kt   CalendarContract: list, create local, read, seed
     engine/StageEngine.kt       StateFlow<StageState>; re-resolves on resume,
@@ -183,8 +186,15 @@ included build. `core/settings.gradle` reuses the root version catalog.
    GLOBAL_ACTION_HOME) with a notification fallback and a re-check on
    resume. Olauncher's home grid, drawer, hidden apps, Private Space UI and
    swipe-app settings are gone.
-5. Voice actions: speak (on-device SpeechRecognizer) and add task (Ramble
-   shortcut, long-press Quick Add).
+5. Voice actions (done): "speak" opens SpeakFragment (built-in
+   SpeechRecognizer, on-device when available, prefer-offline, partial
+   results shown, transcript editable) and routes to a Todoist quick-add
+   task, the Claude app via ACTION_SEND, or the clipboard; Claude is hidden
+   in `settings.claudeHiddenStages` (default wind_down). "add task" starts
+   Todoist's Ramble app shortcut through LauncherApps (falls back to opening
+   Todoist); long-press is a typed quick add. Setup step 7 shows the device
+   checks: mic permission, on-device recognition, Claude installed, Todoist
+   shortcuts seen.
 6. Usage logging and weekly review with one-tap Apply suggestions.
 7. Settings screens.
 

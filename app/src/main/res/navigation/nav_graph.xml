@@ -25,6 +25,13 @@
             app:popEnterAnim="@anim/fade_enter"
             app:popExitAnim="@anim/fade_exit" />
         <action
+            android:id="@+id/action_mainFragment_to_speakFragment"
+            app:destination="@id/speakFragment"
+            app:enterAnim="@anim/fade_enter"
+            app:exitAnim="@anim/fade_exit"
+            app:popEnterAnim="@anim/fade_enter"
+            app:popExitAnim="@anim/fade_exit" />
+        <action
             android:id="@+id/action_mainFragment_to_settingsFragment"
             app:destination="@id/settingsFragment"
             app:enterAnim="@anim/fade_enter"
@@ -46,6 +53,12 @@
             app:popEnterAnim="@anim/fade_enter"
             app:popExitAnim="@anim/fade_exit" />
     </fragment>
+
+    <fragment
+        android:id="@+id/speakFragment"
+        android:name="uk.co.softwarecrafts.contextlauncher.ui.SpeakFragment"
+        android:label="speak_fragment"
+        tools:layout="@layout/fragment_speak" />
 
     <fragment
         android:id="@+id/frictionFragment"

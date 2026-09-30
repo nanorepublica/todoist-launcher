@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.text.InputType
+import android.widget.EditText
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -22,7 +24,9 @@ import app.olauncher.databinding.FragmentHomeBinding
 import app.olauncher.helper.createDialog
 import app.olauncher.helper.dpToPx
 import app.olauncher.helper.expandNotificationDrawer
+import app.olauncher.helper.hideKeyboard
 import app.olauncher.helper.hideStatusBar
+import app.olauncher.helper.showKeyboard
 import app.olauncher.helper.openAlarmApp
 import app.olauncher.helper.openCalendar
 import app.olauncher.helper.showStatusBar
@@ -41,6 +45,7 @@ import uk.co.softwarecrafts.contextlauncher.core.gate.TimedSession
 import uk.co.softwarecrafts.contextlauncher.core.stage.TaskSnapshot
 import uk.co.softwarecrafts.contextlauncher.core.todoist.TodayTasks
 import uk.co.softwarecrafts.contextlauncher.engine.StageState
+import uk.co.softwarecrafts.contextlauncher.voice.Ramble
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -89,6 +94,9 @@ class HomeFragment : Fragment() {
                 findNavController().navigate(R.id.action_mainFragment_to_onboardingFragment)
         }
         binding.tvHint.isVisible = prefs.firstSettingsOpen
+        binding.actionSpeak.setOnClickListener { findNavController().navigate(R.id.action_mainFragment_to_speakFragment) }
+        binding.actionAddTask.setOnClickListener { startRamble() }
+        binding.actionAddTask.setOnLongClickListener { showQuickAdd(); true }
 
         viewModel.appList.observe(viewLifecycleOwner) { apps ->
             installed = apps.orEmpty().filterIsInstance<AppModel.App>().associateBy { it.appPackage }
@@ -261,6 +269,43 @@ class HomeFragment : Fragment() {
         val mm = remaining.toMinutes()
         val ss = remaining.minusMinutes(mm).seconds
         return getString(R.string.session_remaining, label, String.format(Locale.ROOT, "%d:%02d", mm, ss))
+    }
+
+    // ---- add task ----
+
+    private fun startRamble() {
+        val ctx = requireContext()
+        if (Ramble.start(ctx)) return
+        ctx.showToast(getString(R.string.ramble_missing))
+        if (!Ramble.openTodoist(ctx)) ctx.showToast(getString(R.string.todoist_missing))
+    }
+
+    private fun showQuickAdd() {
+        val appContext = requireContext().applicationContext
+        var input: EditText? = null
+        val dialog = requireContext().createDialog(title = R.string.quick_add_title, action = R.string.add, onAction = {
+            val text = input?.text?.toString()?.trim().orEmpty()
+            if (text.isEmpty()) return@createDialog
+            input?.hideKeyboard()
+            viewLifecycleOwner.lifecycleScope.launch {
+                val result = runCatching { Graph.todoist(appContext).quickAdd(text) }
+                appContext.showToast(result.fold(
+                    { getString(R.string.task_added, it.content) },
+                    { getString(R.string.task_add_failed, it.message ?: "network") },
+                ))
+            }
+        }) { container ->
+            EditText(container.context, null, 0, R.style.TextSmall).apply {
+                hint = getString(R.string.quick_add_hint)
+                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                maxLines = 2
+                setPadding(24.dpToPx(), 8.dpToPx(), 24.dpToPx(), 8.dpToPx())
+                input = this
+            }
+        }
+        dialog.showRespectingStatusBar()
+        input?.requestFocus()
+        input?.showKeyboard()
     }
 
     // ---- helpers ----

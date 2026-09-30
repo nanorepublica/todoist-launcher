@@ -91,6 +91,11 @@ class LaunchSmokeTest {
         assertEquals(R.id.frictionFragment, nav.currentDestination?.id)
 
         nav.popBackStack(R.id.mainFragment, false)
+        nav.navigate(R.id.action_mainFragment_to_speakFragment)
+        ShadowLooper.idleMainLooper()
+        assertEquals(R.id.speakFragment, nav.currentDestination?.id)
+
+        nav.popBackStack(R.id.mainFragment, false)
         nav.navigate(R.id.action_mainFragment_to_settingsFragment)
         ShadowLooper.idleMainLooper()
         assertEquals(R.id.settingsFragment, nav.currentDestination?.id)
