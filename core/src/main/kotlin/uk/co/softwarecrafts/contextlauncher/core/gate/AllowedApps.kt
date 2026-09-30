@@ -1,10 +1,11 @@
 package uk.co.softwarecrafts.contextlauncher.core.gate
 
+import uk.co.softwarecrafts.contextlauncher.core.config.GroupKind
 import uk.co.softwarecrafts.contextlauncher.core.config.LauncherConfig
 import uk.co.softwarecrafts.contextlauncher.core.stage.Resolution
 
 /** Where an allowance came from, for the home screen and the log. */
-enum class AllowSource { STAGE, GROUP, TASK_LINKED, PERK, ALWAYS, PHONE_CAMERA }
+enum class AllowSource { STAGE, GROUP, TASK_LINKED, PERK, ALWAYS, PHONE_CAMERA, UNRESTRICTED }
 
 /** One app the current stage lets through, with its fixed cap when it has one. */
 data class AllowedEntry(val packageName: String, val capMinutes: Int?, val source: AllowSource)
@@ -39,6 +40,9 @@ object Gatekeeper {
             config.group(perk.groupId)?.apps?.forEach { entries += AllowedEntry(it.packageName, it.capMinutes, AllowSource.PERK) }
         }
         config.alwaysAllowed.forEach { entries += AllowedEntry(it, null, AllowSource.ALWAYS) }
+        config.groups(GroupKind.UNRESTRICTED).forEach { group ->
+            group.apps.forEach { entries += AllowedEntry(it.packageName, null, AllowSource.UNRESTRICTED) }
+        }
         phoneAndCamera.forEach { entries += AllowedEntry(it, null, AllowSource.PHONE_CAMERA) }
         return dedupe(entries)
     }

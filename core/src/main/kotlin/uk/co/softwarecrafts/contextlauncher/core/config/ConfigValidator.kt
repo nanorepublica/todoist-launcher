@@ -54,6 +54,8 @@ object ConfigValidator {
         if (config.alwaysAllowed.size > LauncherConfig.MAX_ALWAYS_ALLOWED)
             problems += "alwaysAllowed lists ${config.alwaysAllowed.size} apps; the limit is ${LauncherConfig.MAX_ALWAYS_ALLOWED}"
         duplicates(config.alwaysAllowed).forEach { problems += "'$it' is listed twice in alwaysAllowed" }
+        duplicates(config.hiddenApps).forEach { problems += "'$it' is listed twice in hiddenApps" }
+        config.hiddenApps.filter { it.isBlank() }.forEach { problems += "hiddenApps has a blank package name" }
         return problems
     }
 

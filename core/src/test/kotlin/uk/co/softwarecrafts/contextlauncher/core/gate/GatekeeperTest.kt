@@ -67,6 +67,20 @@ class GatekeeperTest {
     }
 
     @Test
+    fun `unrestricted groups are allowed in every stage, uncapped, and hidden apps are just absent`() {
+        val cfg = config.copy(appGroups = config.appGroups.map {
+            if (it.id == SeedConfig.UNRESTRICTED) it.copy(apps = listOf(uk.co.softwarecrafts.contextlauncher.core.config.AllowedApp("com.drone", capMinutes = 3))) else it
+        }, hiddenApps = listOf("com.background.sync"))
+        val r = resolveAt(18)
+        val allowed = Gatekeeper.allowed(cfg, r, emptySet()).associateBy { it.packageName }
+        assertEquals(AllowSource.UNRESTRICTED, allowed["com.drone"]?.source)
+        assertEquals(null, allowed["com.drone"]?.capMinutes)
+        assertEquals(Decision.Allowed, Gatekeeper.decide("com.drone", allowed.values.toList(), r))
+        assertEquals(Decision.Friction(5), Gatekeeper.decide("com.background.sync", allowed.values.toList(), r))
+        assertEquals(setOf("com.android.vending"), cfg.packagesIn(uk.co.softwarecrafts.contextlauncher.core.config.GroupKind.OCCASIONAL))
+    }
+
+    @Test
     fun `perk group is allowed while the perk runs`() {
         val games = config.copy(appGroups = config.appGroups.map {
             if (it.id == SeedConfig.GAMES) it.copy(apps = listOf(uk.co.softwarecrafts.contextlauncher.core.config.AllowedApp("com.wordle"))) else it

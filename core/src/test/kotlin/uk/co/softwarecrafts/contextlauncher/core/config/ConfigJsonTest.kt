@@ -20,6 +20,8 @@ class ConfigJsonTest {
         assertTrue(text.contains("\"start\": \"21:00\""))
         assertTrue(text.contains("\"type\": \"fixed\""))
         assertTrue(text.contains("\"type\": \"calendar\""))
+        assertTrue(text.contains("\"kind\": \"occasional\""))
+        assertTrue(text.contains("\"hiddenApps\""))
     }
 
     @Test

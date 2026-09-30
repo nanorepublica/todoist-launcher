@@ -15,6 +15,8 @@ object SeedConfig {
     const val EVENING = "evening"
     const val GAMES = "games"
     const val BANKING = "banking"
+    const val UNRESTRICTED = "unrestricted"
+    const val OCCASIONAL = "occasional"
 
     fun default(): LauncherConfig = LauncherConfig(
         appGroups = listOf(
@@ -41,6 +43,8 @@ object SeedConfig {
             )),
             AppGroup(GAMES, "Daily games", emptyList()),
             AppGroup(BANKING, "Banking", emptyList()),
+            AppGroup(UNRESTRICTED, "Unrestricted", emptyList(), kind = GroupKind.UNRESTRICTED),
+            AppGroup(OCCASIONAL, "Occasional", listOf(AllowedApp("com.android.vending")), kind = GroupKind.OCCASIONAL),
         ),
         stages = listOf(
             Stage(

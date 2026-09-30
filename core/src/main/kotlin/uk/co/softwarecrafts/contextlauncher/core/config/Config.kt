@@ -26,10 +26,14 @@ data class LauncherConfig(
     val labelGroups: List<LabelGroup> = emptyList(),
     /** Package names always allowed on top of Phone and Camera. At most [MAX_ALWAYS_ALLOWED]. */
     val alwaysAllowed: List<String> = emptyList(),
+    /** Installed for background duty only; never shown in the app list. */
+    val hiddenApps: List<String> = emptyList(),
     val settings: GeneralSettings = GeneralSettings(),
 ) {
     fun stage(id: String): Stage? = stages.firstOrNull { it.id == id }
     fun group(id: String): AppGroup? = appGroups.firstOrNull { it.id == id }
+    fun groups(kind: GroupKind): List<AppGroup> = appGroups.filter { it.kind == kind }
+    fun packagesIn(kind: GroupKind): Set<String> = groups(kind).flatMap { g -> g.apps.map { it.packageName } }.toSet()
 
     companion object {
         const val CURRENT_VERSION = 1
@@ -107,11 +111,23 @@ data class AllowedApp(
     val capMinutes: Int? = null,
 )
 
+/** How a group behaves outside the stage allowlists that reference it. */
+@Serializable
+enum class GroupKind {
+    /** Only allowed when a stage, label or perk names it. */
+    @SerialName("normal") NORMAL,
+    /** Allowed in every stage with no restrictions; listed on the home screen under its name. */
+    @SerialName("unrestricted") UNRESTRICTED,
+    /** Hidden from the app list until a search is typed; gated like any other app. */
+    @SerialName("occasional") OCCASIONAL,
+}
+
 @Serializable
 data class AppGroup(
     val id: String,
     val name: String,
     val apps: List<AllowedApp> = emptyList(),
+    val kind: GroupKind = GroupKind.NORMAL,
 )
 
 @Serializable
