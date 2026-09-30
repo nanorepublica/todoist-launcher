@@ -98,6 +98,9 @@ included build. `core/settings.gradle` reuses the root version catalog.
 - Deferred to phase 4 (home and drawer are rebuilt there): pinned home-apps
   grid, hidden apps, Private Space, screen-time line, pinned shortcuts.
 - Upstream already declares INTERNET and PACKAGE_USAGE_STATS; nothing to add.
+- Gestures (for phase 4): swipe right opens the app list; swipe left is
+  reserved for the filtered notification list (v2, so a no-op in v1). This
+  retires Olauncher's "swipe left/right app" setting.
 
 ## Phase plan
 
