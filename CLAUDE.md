@@ -175,11 +175,11 @@ included build. `core/settings.gradle` reuses the root version catalog.
   export). Onboarding can create a device-local calendar ("Phone stages",
   ACCOUNT_TYPE_LOCAL: on this phone only, never synced) or use any synced
   calendar the user picks. Event titles match stage names, case-insensitive.
-  Verified on the Fairphone 5: the Google Calendar app never lists the local
-  calendar; Fossify Calendar shows it once "CalDAV sync" is on in its
-  settings. Onboarding therefore recommends a Google-account calendar
-  (created on the web via a button that opens the create-calendar page)
-  and keeps the local one as a fallback.
+  Verified on the Fairphone 5: the Google Calendar app lists the local
+  calendar under a non-Google account, and Fossify Calendar shows it once
+  "CalDAV sync" is on in its settings. The local calendar is therefore the
+  recommended route; a Google-account calendar (created on the web via a
+  button that opens the create-calendar page) is the option for web editing.
 - Default schedule (weekdays): Morning routine 06:30-07:30, Work AM
   09:00-12:30, Lunch 12:30-13:30, Work PM 13:30-17:00, Family 17:00-19:00,
   Kids' bedtime 19:00-20:00. Weekends: Morning routine 07:00-08:00, Kids'

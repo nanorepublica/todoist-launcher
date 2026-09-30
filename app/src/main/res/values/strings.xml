@@ -35,7 +35,7 @@
     <string name="onboarding_permission_why">Stages come from a calendar on this phone. Access is read to find the current block and write only to create the calendar and its default schedule below.</string>
     <string name="onboarding_allow_calendar">Allow calendar access</string>
     <string name="onboarding_step_calendar">3. Stage calendar</string>
-    <string name="onboarding_calendar_why">Best: a calendar in your Google account, so blocks sync and can be edited on the web. Fallback: one that lives on this phone only. Event titles must match the stage names.</string>
+    <string name="onboarding_calendar_why">Recommended: create a calendar that lives on this phone. It shows in the Google Calendar app under a non-Google account, so blocks can be edited there. Or pick a calendar from your Google account if you want web editing. Event titles must match the stage names.</string>
     <string name="onboarding_create_calendar">Create "Phone stages" on this phone</string>
     <string name="onboarding_pick_calendar">Pick an existing calendar</string>
     <string name="onboarding_calendar_local">Using "%1$s" (this phone only)</string>
@@ -52,7 +52,7 @@
     <string name="onboarding_calendar_chosen">Using "%1$s"</string>
     <string name="onboarding_calendar_created">Created "%1$s" on this phone</string>
     <string name="onboarding_finished">Setup finished</string>
-    <string name="onboarding_local_note">A phone-only calendar never appears in the Google Calendar app. Fossify Calendar shows it once "CalDAV sync" is switched on in its settings.</string>
+    <string name="onboarding_local_note">This calendar lives on the phone only: it does not sync to the web. In the Google Calendar app it appears under a non-Google account; Fossify Calendar shows it once \"CalDAV sync\" is on in its settings.</string>
     <string name="onboarding_step_schedule">4. Default schedule</string>
     <string name="onboarding_schedule_why">Adds these weekly blocks to the stage calendar. Edit or move them in any calendar app afterwards; the calendar is the source of truth.</string>
     <string name="onboarding_add_schedule">Add default schedule</string>

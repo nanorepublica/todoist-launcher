@@ -104,9 +104,9 @@
             android:layout_height="wrap_content" />
 
         <TextView
-            android:id="@+id/stepCalendarGoogle"
+            android:id="@+id/stepCalendarCreate"
             style="@style/SetupButton"
-            android:text="@string/onboarding_create_google" />
+            android:text="@string/onboarding_create_calendar" />
 
         <TextView
             android:id="@+id/stepCalendarPick"
@@ -114,9 +114,9 @@
             android:text="@string/onboarding_pick_calendar" />
 
         <TextView
-            android:id="@+id/stepCalendarCreate"
+            android:id="@+id/stepCalendarGoogle"
             style="@style/SetupButton"
-            android:text="@string/onboarding_create_calendar" />
+            android:text="@string/onboarding_create_google" />
 
         <!-- Step 4: default schedule -->
         <TextView
