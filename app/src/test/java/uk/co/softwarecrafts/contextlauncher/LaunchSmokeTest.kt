@@ -68,6 +68,35 @@ class LaunchSmokeTest {
         controller.pause().stop().destroy()
     }
 
+    @Test
+    fun `app list, friction and settings screens inflate`() {
+        AppPrefs(app).onboardingDone = true
+        val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
+        ShadowLooper.idleMainLooper()
+        val nav = controller.get().findNavController(R.id.nav_host_fragment)
+
+        nav.navigate(R.id.action_mainFragment_to_appListFragment)
+        ShadowLooper.idleMainLooper()
+        assertEquals(R.id.appListFragment, nav.currentDestination?.id)
+
+        nav.navigate(
+            R.id.action_appListFragment_to_frictionFragment,
+            androidx.core.os.bundleOf(
+                uk.co.softwarecrafts.contextlauncher.ui.FrictionFragment.ARG_PACKAGE to "com.example.app",
+                uk.co.softwarecrafts.contextlauncher.ui.FrictionFragment.ARG_LABEL to "Example",
+                uk.co.softwarecrafts.contextlauncher.ui.FrictionFragment.ARG_USER to android.os.Process.myUserHandle().toString(),
+            ),
+        )
+        ShadowLooper.idleMainLooper()
+        assertEquals(R.id.frictionFragment, nav.currentDestination?.id)
+
+        nav.popBackStack(R.id.mainFragment, false)
+        nav.navigate(R.id.action_mainFragment_to_settingsFragment)
+        ShadowLooper.idleMainLooper()
+        assertEquals(R.id.settingsFragment, nav.currentDestination?.id)
+        controller.pause().stop().destroy()
+    }
+
     private fun awaitResolved(engine: StageEngine): StageState {
         engine.refresh()
         val deadline = System.currentTimeMillis() + 10_000

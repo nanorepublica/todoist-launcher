@@ -61,6 +61,9 @@ core/                           standalone Gradle build, pure Kotlin/JVM
     todoist/TodoistMapper.kt    due-date parsing in the user's zone -> TaskSnapshot
     todoist/TaskCache.kt        pure merge rules for full/incremental sync
     todoist/TodayTasks.kt       home-screen rows: gating first, then overdue
+    gate/AllowedApps.kt         Gatekeeper: allowlist for a resolution + launch decision
+    gate/Escalation.kt          0/10/15/30 s ladder, per-block BypassCounter, limit options
+    gate/TimedSession.kt        one running timed session + SessionRules for enforcement
   src/test/kotlin/.../core/
     FakeClock.kt                settable clock for tests
 app/                            Android app (Olauncher fork)
@@ -74,6 +77,10 @@ app/                            Android app (Olauncher fork)
   src/test/java/uk/co/softwarecrafts/contextlauncher/
     LaunchSmokeTest.kt          Robolectric boot test; add a case per new screen
     ui/OnboardingFragment.kt    first-run setup, re-openable from Settings > Context
+    ui/HomeFragment.kt          text-only home: stage, clock, session, tasks, allowed apps
+    ui/AppListFragment.kt       searchable app list; off-list apps greyed, gated on tap
+    ui/FrictionFragment.kt      bypass screen: reason, time-limit pills, countdown
+    gate/GateController.kt      decisions, session + bypass counter (persisted), enforcement
     calendar/CalendarStore.kt   CalendarContract: list, create local, read, seed
     engine/StageEngine.kt       StateFlow<StageState>; re-resolves on resume,
                                 calendar change and at nextChangeAt
@@ -85,12 +92,11 @@ app/                            Android app (Olauncher fork)
   src/main/java/app/olauncher/  borrowed Olauncher code, package kept as-is
     MainActivity.kt             single activity, nav host, back handling
     MainViewModel.kt            app list, launching, home apps, screen time
-    ui/HomeFragment.kt          home screen (gestures, clock, home apps)
-    ui/AppDrawerFragment.kt     searchable app list ("drawer")
     ui/SettingsFragment.kt      settings screen
     data/Prefs.kt               SharedPreferences wrapper
     helper/Utils.kt             app list loading, launcher-default checks
-    helper/MyAccessibilityService.kt  double-tap lock (reused for "time's up")
+    helper/MyAccessibilityService.kt  double-tap lock + window tracking for "time's up"
+    listener/OnSwipeTouchListener.kt  home gestures
     helper/usageStats/          UsageStatsManager event reader
 gradle/libs.versions.toml       version catalog shared by both builds
 scripts/install-android-sdk.sh  SDK bootstrap for cloud sessions
@@ -138,8 +144,13 @@ included build. `core/settings.gradle` reuses the root version catalog.
   rename apps, app info, uninstall, set-as-default flow.
 - Dropped in phase 0: daily wallpaper, rate/share/review/Pro dialogs and
   links, translations, Play Store metadata.
-- Deferred to phase 4 (home and drawer are rebuilt there): pinned home-apps
-  grid, hidden apps, Private Space, screen-time line, pinned shortcuts.
+- Removed in phase 4 with the new home and app list: pinned home-apps grid,
+  hidden apps, Private Space UI, screen-time line, pinned shortcuts. Some
+  unused MainViewModel/Prefs code for them remains; prune when touched.
+- Gating fails open: until setup is complete (no stage resolved) every app
+  launches without friction.
+- The accessibility service runs in the main process (Olauncher had it in
+  ":serviceProcess") so it shares the GateController singleton.
 - Upstream already declares INTERNET and PACKAGE_USAGE_STATS; nothing to add.
 - Gestures (for phase 4): swipe right opens the app list; swipe left is
   reserved for the filtered notification list (v2, so a no-op in v1). This
@@ -159,8 +170,14 @@ included build. `core/settings.gradle` reuses the root version catalog.
    token, offline cache in Room (`tasks`, `sync_state`), complete from the
    home screen via `item_close`, quick add, 15-minute WorkManager refresh
    plus a sync on every launcher resume (60 s throttle), token step in Setup.
-4. Home and gating: text-only home, greyed off-list apps in search, friction
-   screen, countdown escalation, accessibility-driven return to home.
+4. Home and gating (done): text-only home (stage, clock, session line,
+   tasks, allowed apps), app list with greyed off-list apps, friction screen
+   with reason + capped time-limit pills + 0/10/15/30 s countdown per stage
+   block, capped allowed apps open with a timer, "time's up" via the
+   accessibility service (main process, window-state events,
+   GLOBAL_ACTION_HOME) with a notification fallback and a re-check on
+   resume. Olauncher's home grid, drawer, hidden apps, Private Space UI and
+   swipe-app settings are gone.
 5. Voice actions: speak (on-device SpeechRecognizer) and add task (Ramble
    shortcut, long-press Quick Add).
 6. Usage logging and weekly review with one-tap Apply suggestions.
