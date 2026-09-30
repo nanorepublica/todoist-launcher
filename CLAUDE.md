@@ -40,9 +40,21 @@ SPEC.md                         v1 spec (source of truth)
 core/                           standalone Gradle build, pure Kotlin/JVM
   src/main/kotlin/uk/co/softwarecrafts/contextlauncher/core/
     Clock.kt                    Clock interface + SystemClock
+    config/Config.kt            LauncherConfig, Stage, StageTrigger, AppGroup...
+    config/ConfigJson.kt        the one JSON codec (export file + Room columns)
+    config/ConfigValidator.kt   cross-field checks; import is rejected on problems
+    config/SeedConfig.kt        SPEC.md stage table as the first-run config
+    log/LogEvent.kt             usage-log record + EventType
   src/test/kotlin/.../core/
     FakeClock.kt                settable clock for tests
 app/                            Android app (Olauncher fork)
+  schemas/                      Room schema history (commit every version)
+  src/main/java/uk/co/softwarecrafts/contextlauncher/   new code
+    Graph.kt                    lazy singletons: database, repositories, clock
+    data/db/                    Room entities, DAOs, AppDatabase, Mappers
+    data/ConfigRepository.kt    load/save/seed/export/import of LauncherConfig
+    data/EventLogRepository.kt  append-only usage log
+    ui/ConfigTransfer.kt        JSON export/import via the system file picker
   src/main/java/app/olauncher/  borrowed Olauncher code, package kept as-is
     MainActivity.kt             single activity, nav host, back handling
     MainViewModel.kt            app list, launching, home apps, screen time
@@ -72,7 +84,11 @@ included build. `core/settings.gradle` reuses the root version catalog.
   interface, with JUnit tests using `FakeClock`. The app only adapts Android
   inputs (calendar rows, Todoist JSON, usage events) into core types.
 - Room holds config and the usage log. Repositories wrap DAOs; UI never runs
-  SQL.
+  SQL. Lists inside a row (allowed apps, group ids) and the stage trigger are
+  JSON text columns encoded with the core codec, not join tables. Schema
+  changes: bump AppDatabase.VERSION, add a Migration, commit app/schemas.
+- Dependencies come from `Graph` (a small service locator), not a DI
+  framework.
 - The Todoist token is entered in-app and stored with
   `androidx.security:security-crypto` EncryptedSharedPreferences (deprecated
   upstream but functional). It is excluded from Android auto-backup. Nothing
@@ -105,8 +121,9 @@ included build. `core/settings.gradle` reuses the root version catalog.
 ## Phase plan
 
 0. Fork baseline (done): rename, strip upstream extras, core module, this file.
-1. Data layer: Room entities (stages, allowlists with optional caps, label to
-   app-group map, always-allowed apps, event log), JSON import/export.
+1. Data layer (done): Room entities (stages, allowlists with optional caps,
+   label to app-group map, always-allowed apps, event log), JSON
+   import/export from Settings > Context.
 2. Stage engine: CalendarContract reader + core `StageResolver` with fake-clock
    tests; stage banner on the home screen.
 3. Todoist: unified API v1, incremental `/sync`, offline cache, complete from
