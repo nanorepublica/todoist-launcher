@@ -1,0 +1,24 @@
+// Pure Kotlin/JVM module: stage engine, gating rules, countdown escalation and
+// weekly-review rules live here with no Android dependencies, so the tests run
+// on any JVM in seconds. The app depends on it as 'uk.co.softwarecrafts:core'.
+plugins {
+    alias(libs.plugins.kotlin.jvm)
+}
+
+group = 'uk.co.softwarecrafts'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
+dependencies {
+    implementation libs.kotlin.stdlib
+    testImplementation libs.junit
+}

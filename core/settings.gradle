@@ -1,0 +1,22 @@
+// `core` is a standalone Gradle build included by the root project (see the
+// root settings.gradle). It only needs Maven Central, so its tests run on any
+// machine without the Android SDK: `cd core && ../gradlew test`.
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+    versionCatalogs {
+        libs {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
+}
+
+rootProject.name = "core"

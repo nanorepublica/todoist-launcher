@@ -1,2 +1,3 @@
 include ':app'
+includeBuild 'core'
 rootProject.name = "ContextLauncher"
