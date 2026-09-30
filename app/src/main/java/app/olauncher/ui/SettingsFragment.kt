@@ -39,6 +39,7 @@ import app.olauncher.helper.showPopupMenu
 import app.olauncher.helper.showStatusBar
 import app.olauncher.helper.showToast
 import app.olauncher.listener.DeviceAdmin
+import uk.co.softwarecrafts.contextlauncher.ui.ConfigTransfer
 
 class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListener {
 
@@ -50,6 +51,13 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     private var dialog: OlDialog? = null
+    private lateinit var configTransfer: ConfigTransfer
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Result launchers must be registered before the fragment starts
+        configTransfer = ConfigTransfer(this) { message -> context?.showToast(message) }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
@@ -91,6 +99,19 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
             R.id.screenTimeOnOff -> viewModel.showDialog.postValue(Constants.Dialog.DIGITAL_WELLBEING)
             R.id.appInfo -> openAppInfo(requireContext(), Process.myUserHandle(), BuildConfig.APPLICATION_ID)
             R.id.setLauncher -> viewModel.resetLauncherLiveData.call()
+            R.id.exportConfig -> configTransfer.export()
+            R.id.importConfig -> showDialog(
+                requireContext().createDialog(
+                    title = R.string.import_config, action = R.string.choose_file,
+                    message = R.string.import_config_message, onAction = { configTransfer.import() },
+                )
+            )
+            R.id.resetConfig -> showDialog(
+                requireContext().createDialog(
+                    title = R.string.reset_config, action = R.string.reset,
+                    message = R.string.reset_config_message, onAction = { configTransfer.resetToSeed() },
+                )
+            )
             R.id.toggleLock -> toggleLockMode()
             // Home button for recents feature disabled
             // R.id.homeButtonRecents -> toggleHomeButtonRecents()
@@ -128,6 +149,9 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
         binding.olauncherHiddenApps.setOnClickListener(this)
         binding.appInfo.setOnClickListener(this)
         binding.setLauncher.setOnClickListener(this)
+        binding.exportConfig.setOnClickListener(this)
+        binding.importConfig.setOnClickListener(this)
+        binding.resetConfig.setOnClickListener(this)
         binding.autoShowKeyboard.setOnClickListener(this)
         binding.toggleLock.setOnClickListener(this)
         // Home button for recents feature disabled

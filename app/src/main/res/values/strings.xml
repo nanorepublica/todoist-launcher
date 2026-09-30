@@ -18,6 +18,14 @@
 
 
     <string name="app">App</string>
+    <string name="context_section">Context</string>
+    <string name="export_config">Export config</string>
+    <string name="import_config">Import config</string>
+    <string name="import_config_message">Importing replaces every stage, app group and label mapping with the contents of the chosen file. The usage log is kept.</string>
+    <string name="choose_file">Choose file</string>
+    <string name="reset_config">Reset config to defaults</string>
+    <string name="reset_config_message">This replaces every stage, app group and label mapping with the built-in defaults from the spec. Export first if you want to keep your changes.</string>
+    <string name="reset">Reset</string>
     <string name="set_as_default_launcher">Set as default launcher</string>
     <string name="set_as_default_launcher_u"><u>Set as default launcher</u></string>
     <string name="set_as_default_launcher_first">Set Olauncher default first</string>

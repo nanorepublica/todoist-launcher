@@ -63,7 +63,55 @@
                     android:layout_marginBottom="8dp"
                     android:text="@string/set_as_default_launcher" />
 
+            </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/rounded_rect_shade_color"
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="16dp">
+
+                <TextView
+                    style="@style/TextLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/context_section"
+                    android:textColor="?attr/primaryColor" />
+
+                <TextView
+                    android:id="@+id/exportConfig"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="12dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/export_config" />
+
+                <TextView
+                    android:id="@+id/importConfig"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/import_config" />
+
+                <TextView
+                    android:id="@+id/resetConfig"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/reset_config" />
 
             </LinearLayout>
 
@@ -227,7 +275,6 @@
                         android:padding="8dp"
                         android:text="@string/on" />
                 </FrameLayout>
-
 
                 <FrameLayout
                     android:layout_width="match_parent"
@@ -461,8 +508,6 @@
                 </FrameLayout>
                 -->
             </LinearLayout>
-
-
 
         </LinearLayout>
 
