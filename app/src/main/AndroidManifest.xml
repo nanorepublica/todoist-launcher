@@ -6,6 +6,8 @@
     <!--Stage calendar: read blocks, and create the device calendar in onboarding-->
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    <!--"Time's up" fallback notification when the accessibility service is off-->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="PackageVisibilityPolicy,QueryAllPackagesPermission" />
@@ -93,8 +95,7 @@
             android:name=".helper.MyAccessibilityService"
             android:exported="false"
             android:label="@string/app_name"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:process=":serviceProcess">
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />

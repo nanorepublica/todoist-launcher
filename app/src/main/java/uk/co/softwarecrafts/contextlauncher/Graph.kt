@@ -11,6 +11,8 @@ import uk.co.softwarecrafts.contextlauncher.data.todoist.TodoistApi
 import uk.co.softwarecrafts.contextlauncher.data.todoist.TodoistRepository
 import uk.co.softwarecrafts.contextlauncher.data.todoist.TokenStore
 import uk.co.softwarecrafts.contextlauncher.engine.StageEngine
+import uk.co.softwarecrafts.contextlauncher.gate.GateController
+import uk.co.softwarecrafts.contextlauncher.data.AppPrefs
 
 /**
  * Process-wide singletons, built lazily on first use. A hand-rolled service
@@ -21,6 +23,7 @@ object Graph {
     @Volatile private var database: AppDatabase? = null
     @Volatile private var engine: StageEngine? = null
     @Volatile private var todoist: TodoistRepository? = null
+    @Volatile private var gate: GateController? = null
 
     val clock: Clock = SystemClock()
 
@@ -35,6 +38,7 @@ object Graph {
             engine?.close()
             engine = null
             todoist = null
+            gate = null
             database?.close()
             database = null
         }
@@ -56,6 +60,18 @@ object Graph {
                 engine = created
                 created.taskSource = todoist(context)
             }
+        }
+
+    fun gate(context: Context): GateController =
+        gate ?: synchronized(this) {
+            gate ?: GateController(
+                context = context.applicationContext,
+                clock = clock,
+                config = config(context),
+                engine = stageEngine(context),
+                eventLog = eventLog(context),
+                prefs = AppPrefs(context.applicationContext),
+            ).also { gate = it }
         }
 
     fun todoist(context: Context): TodoistRepository =
