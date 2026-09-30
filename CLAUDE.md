@@ -45,6 +45,11 @@ core/                           standalone Gradle build, pure Kotlin/JVM
     config/ConfigValidator.kt   cross-field checks; import is rejected on problems
     config/SeedConfig.kt        SPEC.md stage table as the first-run config
     log/LogEvent.kt             usage-log record + EventType
+    stage/StageResolver.kt      which stage is active now (stateless, tested)
+    stage/StageTracker.kt       block changes for per-block counters and logging
+    stage/Inputs.kt             CalendarEvent, TaskSnapshot
+    stage/Resolution.kt         Activation, ActivePerk, Resolution
+    stage/DefaultSchedule.kt    weekly blocks onboarding writes to the calendar
   src/test/kotlin/.../core/
     FakeClock.kt                settable clock for tests
 app/                            Android app (Olauncher fork)
@@ -55,6 +60,11 @@ app/                            Android app (Olauncher fork)
     data/ConfigRepository.kt    load/save/seed/export/import of LauncherConfig
     data/EventLogRepository.kt  append-only usage log
     ui/ConfigTransfer.kt        JSON export/import via the system file picker
+    ui/OnboardingFragment.kt    first-run setup, re-openable from Settings > Context
+    calendar/CalendarStore.kt   CalendarContract: list, create local, read, seed
+    engine/StageEngine.kt       StateFlow<StageState>; re-resolves on resume,
+                                calendar change and at nextChangeAt
+    data/AppPrefs.kt            non-exportable flags (onboardingDone)
   src/main/java/app/olauncher/  borrowed Olauncher code, package kept as-is
     MainActivity.kt             single activity, nav host, back handling
     MainViewModel.kt            app list, launching, home apps, screen time
@@ -124,8 +134,10 @@ included build. `core/settings.gradle` reuses the root version catalog.
 1. Data layer (done): Room entities (stages, allowlists with optional caps,
    label to app-group map, always-allowed apps, event log), JSON
    import/export from Settings > Context.
-2. Stage engine: CalendarContract reader + core `StageResolver` with fake-clock
-   tests; stage banner on the home screen.
+2. Stage engine (done): CalendarContract reader + core `StageResolver` with
+   fake-clock tests; stage line on the home screen; onboarding (default
+   launcher, calendar permission, create or pick the stage calendar, seed
+   the default schedule).
 3. Todoist: unified API v1, incremental `/sync`, offline cache, complete from
    launcher, 15-minute WorkManager refresh.
 4. Home and gating: text-only home, greyed off-list apps in search, friction
@@ -148,3 +160,14 @@ included build. `core/settings.gradle` reuses the root version catalog.
 - Task-linked app groups: only tasks due today or overdue unlock their group.
 - Weekly review "falls due": due date is today or earlier; if the task has a
   time, that time has passed.
+- A task stage with no tasks carrying its label today simply runs its
+  calendar block; "done" needs at least one such task, all complete.
+- The stage calendar is identified by display name (portable in the config
+  export). Onboarding can create a device-local calendar ("Phone stages",
+  ACCOUNT_TYPE_LOCAL: on this phone only, never synced) or use any synced
+  calendar the user picks. Event titles match stage names, case-insensitive.
+- Default schedule (weekdays): Morning routine 06:30-07:30, Work AM
+  09:00-12:30, Lunch 12:30-13:30, Work PM 13:30-17:00, Family 17:00-19:00,
+  Kids' bedtime 19:00-20:00. Weekends: Morning routine 07:00-08:00, Kids'
+  bedtime 19:00-20:00. Written as weekly recurring events; edit in a
+  calendar app.

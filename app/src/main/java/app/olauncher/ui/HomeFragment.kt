@@ -41,6 +41,15 @@ import app.olauncher.helper.openDialerApp
 import app.olauncher.helper.showToast
 import app.olauncher.listener.OnSwipeTouchListener
 import app.olauncher.listener.ViewSwipeTouchListener
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.launch
+import uk.co.softwarecrafts.contextlauncher.Graph
+import uk.co.softwarecrafts.contextlauncher.engine.StageState
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -69,6 +78,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
         deviceManager = context?.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
 
         initObservers()
+        observeStage()
         setHomeAlignment(prefs.homeAlignment)
         initSwipeTouchListener()
         initClickListeners()
@@ -76,6 +86,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
 
     override fun onResume() {
         super.onResume()
+        Graph.stageEngine(requireContext()).refresh()
         populateHomeScreen(false)
         viewModel.isOlauncherDefault()
         if (prefs.showStatusBar) showStatusBar()
@@ -91,6 +102,8 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
             R.id.date -> openCalendarApp()
             R.id.setDefaultLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.tvScreenTime -> openScreenTimeDigitalWellbeing()
+            R.id.tvStage -> if (Graph.stageEngine(requireContext()).state.value is StageState.SetupNeeded)
+                findNavController().navigate(R.id.action_mainFragment_to_onboardingFragment)
 
             else -> {
                 try { // Launch app
@@ -226,6 +239,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
         binding.setDefaultLauncher.setOnClickListener(this)
         binding.setDefaultLauncher.setOnLongClickListener(this)
         binding.tvScreenTime.setOnClickListener(this)
+        binding.tvStage.setOnClickListener(this)
         binding.tvScreenTime.setOnLongClickListener(this)
 
         // These fire only on d-pad/keyboard events; touch is consumed by ViewSwipeTouchListener
@@ -259,6 +273,26 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
         binding.homeApp6.gravity = horizontalGravity
         binding.homeApp7.gravity = horizontalGravity
         binding.homeApp8.gravity = horizontalGravity
+    }
+
+    private fun observeStage() {
+        val engine = Graph.stageEngine(requireContext())
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                engine.state.collect { state ->
+                    binding.tvStage.text = when (state) {
+                        is StageState.Loading -> ""
+                        is StageState.SetupNeeded -> getString(R.string.stage_setup_needed, state.reason)
+                        is StageState.Ready -> {
+                            val until = state.resolution.nextChangeAt
+                                ?.let { LocalDateTime.ofInstant(it, engine.zone).toLocalTime().format(STAGE_TIME) }
+                            if (until != null) getString(R.string.stage_until, state.resolution.stage.name, until)
+                            else state.resolution.stage.name
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun populateDateTime() {
@@ -699,6 +733,10 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
                 textOnClick(view)
             }
         }
+    }
+
+    private companion object {
+        val STAGE_TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     }
 
     override fun onDestroyView() {

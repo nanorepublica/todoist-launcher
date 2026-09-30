@@ -23,6 +23,19 @@
         android:layout_height="1dp"
         android:contentDescription="@string/recents_layout_description" /> -->
 
+
+    <!-- Current stage (Context launcher)-->
+    <TextView
+        android:id="@+id/tvStage"
+        style="@style/TextSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="24dp"
+        android:paddingHorizontal="3dp"
+        android:paddingVertical="4dp"
+        tools:text="Work AM · until 12:30" />
+
     <!-- Clock and calendar-->
     <LinearLayout
         android:id="@+id/dateTimeLayout"
