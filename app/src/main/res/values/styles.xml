@@ -105,6 +105,16 @@
         <item name="android:textColor">@drawable/text_colors_light</item>
     </style>
 
+    <!-- Text-only button: outlined pill, dimmed when disabled -->
+    <style name="SetupButton" parent="TextSmallBold">
+        <item name="android:background">@drawable/bg_button_outline</item>
+        <item name="android:paddingHorizontal">18dp</item>
+        <item name="android:paddingVertical">10dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
     <!-- Popup menu anchored to a settings row -->
     <style name="OlPopupMenu" parent="Widget.AppCompat.PopupMenu">
         <item name="android:popupBackground">@drawable/rounded_primary_gradient</item>

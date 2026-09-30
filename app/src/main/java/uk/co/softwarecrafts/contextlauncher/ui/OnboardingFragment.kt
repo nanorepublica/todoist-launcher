@@ -13,6 +13,8 @@ import app.olauncher.MainViewModel
 import app.olauncher.R
 import app.olauncher.databinding.FragmentOnboardingBinding
 import app.olauncher.helper.isDefaultLauncher
+import app.olauncher.helper.openUrl
+import android.widget.ScrollView
 import app.olauncher.helper.OlDialog
 import app.olauncher.helper.createDialog
 import android.widget.LinearLayout
@@ -44,7 +46,9 @@ class OnboardingFragment : Fragment() {
     private var calendars: List<CalendarStore.CalendarInfo> = emptyList()
     private var pickerDialog: OlDialog? = null
 
-    private val requestCalendar = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+    private val requestCalendar = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+        val granted = result.values.all { it }
+        context?.showToast(getString(if (granted) R.string.onboarding_permission_granted else R.string.onboarding_permission_denied))
         refreshStatus()
     }
 
@@ -63,6 +67,10 @@ class OnboardingFragment : Fragment() {
         binding.stepPermissionAction.setOnClickListener { requestCalendar.launch(CalendarStore.PERMISSIONS) }
         binding.stepCalendarCreate.setOnClickListener { createLocalCalendar() }
         binding.stepCalendarPick.setOnClickListener { pickCalendar(it) }
+        binding.stepCalendarGoogle.setOnClickListener {
+            requireContext().showToast(getString(R.string.onboarding_google_hint), android.widget.Toast.LENGTH_LONG)
+            requireContext().openUrl(GOOGLE_CREATE_CALENDAR_URL)
+        }
         binding.stepScheduleAction.setOnClickListener { writeSchedule() }
         binding.finish.setOnClickListener { finish() }
 
@@ -82,9 +90,11 @@ class OnboardingFragment : Fragment() {
         binding.stepDefaultStatus.text = getString(if (ctx.isDefaultLauncher()) R.string.status_done else R.string.status_todo)
         val hasPermission = calendar.hasPermission()
         binding.stepPermissionStatus.text = getString(if (hasPermission) R.string.status_done else R.string.status_todo)
-        binding.stepCalendarCreate.isEnabled = hasPermission
-        binding.stepCalendarPick.isEnabled = hasPermission
-        binding.stepScheduleAction.isEnabled = false
+        binding.stepDefaultAction.setActive(!ctx.isDefaultLauncher())
+        binding.stepPermissionAction.setActive(!hasPermission)
+        binding.stepCalendarCreate.setActive(hasPermission)
+        binding.stepCalendarPick.setActive(hasPermission)
+        binding.stepScheduleAction.setActive(false)
 
         viewLifecycleOwner.lifecycleScope.launch {
             val name = withContext(Dispatchers.IO) { Graph.config(ctx).load().settings.calendarName }
@@ -116,7 +126,7 @@ class OnboardingFragment : Fragment() {
                     else -> R.string.status_todo
                 }
             )
-            binding.stepScheduleAction.isEnabled = info != null && !hasSchedule
+            binding.stepScheduleAction.setActive(info != null && !hasSchedule)
         }
     }
 
@@ -130,7 +140,10 @@ class OnboardingFragment : Fragment() {
                     info
                 }
             }
-            result.onFailure { ctx.showToast("Could not create calendar: ${it.message}") }
+            result.fold(
+                { ctx.showToast(getString(R.string.onboarding_calendar_created, it.name)) },
+                { ctx.showToast("Could not create calendar: ${it.message}") },
+            )
             Graph.stageEngine(ctx).refresh()
             refreshStatus()
         }
@@ -147,7 +160,7 @@ class OnboardingFragment : Fragment() {
             title = R.string.choose_calendar,
             action = R.string.close,
         ) { container ->
-            LinearLayout(container.context).apply {
+            val list = LinearLayout(container.context).apply {
                 orientation = LinearLayout.VERTICAL
                 calendars.forEach { cal ->
                     addView(TextView(context, null, 0, R.style.TextSmall).apply {
@@ -160,6 +173,16 @@ class OnboardingFragment : Fragment() {
                     })
                 }
             }
+            ScrollView(container.context).apply {
+                isVerticalScrollBarEnabled = true
+                addView(list)
+                // Long lists scroll inside the dialog instead of pushing it off screen
+                val maxHeight = resources.displayMetrics.heightPixels / 2
+                layoutParams = android.view.ViewGroup.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    if (calendars.size > 6) maxHeight else android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                )
+            }
         }
         pickerDialog = dialog
         dialog.showRespectingStatusBar()
@@ -169,6 +192,7 @@ class OnboardingFragment : Fragment() {
         val ctx = requireContext().applicationContext
         viewLifecycleOwner.lifecycleScope.launch {
             withContext(Dispatchers.IO) { saveCalendarName(chosen.name) }
+            ctx.showToast(getString(R.string.onboarding_calendar_chosen, chosen.name))
             Graph.stageEngine(ctx).refresh()
             refreshStatus()
         }
@@ -201,6 +225,7 @@ class OnboardingFragment : Fragment() {
 
     private fun finish() {
         prefs.onboardingDone = true
+        requireContext().showToast(getString(R.string.onboarding_finished))
         Graph.stageEngine(requireContext()).refresh()
         findNavController().popBackStack()
     }
@@ -212,7 +237,13 @@ class OnboardingFragment : Fragment() {
         _binding = null
     }
 
+    /** Buttons stay tappable when done (re-running is harmless) but dim to show the step is complete. */
+    private fun TextView.setActive(active: Boolean) {
+        alpha = if (active) 1f else 0.45f
+    }
+
     private companion object {
         val TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        const val GOOGLE_CREATE_CALENDAR_URL = "https://calendar.google.com/calendar/r/settings/createcalendar"
     }
 }

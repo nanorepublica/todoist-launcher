@@ -45,10 +45,7 @@
 
         <TextView
             android:id="@+id/stepDefaultAction"
-            style="@style/TextSmallBold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp"
+            style="@style/SetupButton"
             android:text="@string/onboarding_set_default" />
 
         <!-- Step 2: calendar permission -->
@@ -75,10 +72,7 @@
 
         <TextView
             android:id="@+id/stepPermissionAction"
-            style="@style/TextSmallBold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp"
+            style="@style/SetupButton"
             android:text="@string/onboarding_allow_calendar" />
 
         <!-- Step 3: stage calendar -->
@@ -110,20 +104,19 @@
             android:layout_height="wrap_content" />
 
         <TextView
-            android:id="@+id/stepCalendarCreate"
-            style="@style/TextSmallBold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp"
-            android:text="@string/onboarding_create_calendar" />
+            android:id="@+id/stepCalendarGoogle"
+            style="@style/SetupButton"
+            android:text="@string/onboarding_create_google" />
 
         <TextView
             android:id="@+id/stepCalendarPick"
-            style="@style/TextSmallBold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp"
+            style="@style/SetupButton"
             android:text="@string/onboarding_pick_calendar" />
+
+        <TextView
+            android:id="@+id/stepCalendarCreate"
+            style="@style/SetupButton"
+            android:text="@string/onboarding_create_calendar" />
 
         <!-- Step 4: default schedule -->
         <TextView
@@ -157,19 +150,14 @@
 
         <TextView
             android:id="@+id/stepScheduleAction"
-            style="@style/TextSmallBold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp"
+            style="@style/SetupButton"
             android:text="@string/onboarding_add_schedule" />
 
         <TextView
             android:id="@+id/finish"
-            style="@style/TextLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/SetupButton"
             android:layout_marginTop="40dp"
-            android:paddingVertical="8dp"
+            android:paddingHorizontal="28dp"
             android:text="@string/onboarding_finish"
             android:textColor="?attr/primaryColor" />
 
