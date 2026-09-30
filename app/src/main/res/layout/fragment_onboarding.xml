@@ -213,6 +213,47 @@
             style="@style/SetupButton"
             android:text="@string/todoist_forget" />
 
+        <!-- Step 6: time's up enforcement -->
+        <TextView
+            style="@style/TextMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/onboarding_step_enforce"
+            android:textColor="?attr/primaryColor" />
+
+        <TextView
+            style="@style/TextSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/onboarding_enforce_why" />
+
+        <TextView
+            android:id="@+id/stepEnforceStatus"
+            style="@style/TextSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/onboarding_enforce_off" />
+
+        <TextView
+            android:id="@+id/enforceAccessibility"
+            style="@style/SetupButton"
+            android:text="@string/onboarding_open_accessibility" />
+
+        <TextView
+            android:id="@+id/stepNotifyStatus"
+            style="@style/TextSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/onboarding_notifications_off" />
+
+        <TextView
+            android:id="@+id/enforceNotifications"
+            style="@style/SetupButton"
+            android:text="@string/onboarding_allow_notifications" />
+
         <TextView
             android:id="@+id/finish"
             style="@style/SetupButton"

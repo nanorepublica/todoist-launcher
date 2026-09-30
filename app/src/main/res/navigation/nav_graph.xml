@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="app.olauncher.ui.HomeFragment"
+        android:name="uk.co.softwarecrafts.contextlauncher.ui.HomeFragment"
         android:label="main_fragment"
         tools:layout="@layout/fragment_home">
         <action
@@ -35,19 +35,24 @@
 
     <fragment
         android:id="@+id/appListFragment"
-        android:name="app.olauncher.ui.AppDrawerFragment"
+        android:name="uk.co.softwarecrafts.contextlauncher.ui.AppListFragment"
         android:label="app_list_fragment"
-        tools:layout="@layout/fragment_app_drawer">
+        tools:layout="@layout/fragment_app_list">
         <action
-            android:id="@+id/action_appListFragment_to_settingsFragment2"
-            app:destination="@id/settingsFragment"
+            android:id="@+id/action_appListFragment_to_frictionFragment"
+            app:destination="@id/frictionFragment"
             app:enterAnim="@anim/fade_enter"
             app:exitAnim="@anim/fade_exit"
             app:popEnterAnim="@anim/fade_enter"
-            app:popExitAnim="@anim/fade_exit"
-            app:popUpTo="@+id/appListFragment"
-            app:popUpToInclusive="true" />
+            app:popExitAnim="@anim/fade_exit" />
     </fragment>
+
+    <fragment
+        android:id="@+id/frictionFragment"
+        android:name="uk.co.softwarecrafts.contextlauncher.ui.FrictionFragment"
+        android:label="friction_fragment"
+        tools:layout="@layout/fragment_friction" />
+
     <fragment
         android:id="@+id/settingsFragment"
         android:name="app.olauncher.ui.SettingsFragment"
@@ -56,13 +61,6 @@
         <action
             android:id="@+id/action_settingsFragment_to_onboardingFragment"
             app:destination="@id/onboardingFragment"
-            app:enterAnim="@anim/fade_enter"
-            app:exitAnim="@anim/fade_exit"
-            app:popEnterAnim="@anim/fade_enter"
-            app:popExitAnim="@anim/fade_exit" />
-        <action
-            android:id="@+id/action_settingsFragment_to_appListFragment"
-            app:destination="@id/appListFragment"
             app:enterAnim="@anim/fade_enter"
             app:exitAnim="@anim/fade_exit"
             app:popEnterAnim="@anim/fade_enter"

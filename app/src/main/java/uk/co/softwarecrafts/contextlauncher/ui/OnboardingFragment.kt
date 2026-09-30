@@ -31,6 +31,12 @@ import uk.co.softwarecrafts.contextlauncher.data.AppPrefs
 import uk.co.softwarecrafts.contextlauncher.data.todoist.SyncStatus
 import uk.co.softwarecrafts.contextlauncher.data.todoist.TodoistSyncWorker
 import app.olauncher.helper.hideKeyboard
+import app.olauncher.helper.isAccessServiceEnabled
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.provider.Settings
+import androidx.core.content.ContextCompat
 import java.time.LocalDateTime
 import java.time.DayOfWeek
 import java.time.format.DateTimeFormatter
@@ -49,6 +55,8 @@ class OnboardingFragment : Fragment() {
     private lateinit var calendar: CalendarStore
     private var calendars: List<CalendarStore.CalendarInfo> = emptyList()
     private var pickerDialog: OlDialog? = null
+
+    private val requestNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { refreshStatus() }
 
     private val requestCalendar = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         val granted = result.values.all { it }
@@ -80,6 +88,8 @@ class OnboardingFragment : Fragment() {
         binding.todoistSave.setOnClickListener { saveTodoistToken() }
         binding.todoistOpenSettings.setOnClickListener { requireContext().openUrl(TODOIST_INTEGRATIONS_URL) }
         binding.todoistForget.setOnClickListener { forgetTodoistToken() }
+        binding.enforceAccessibility.setOnClickListener { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
+        binding.enforceNotifications.setOnClickListener { requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS) }
 
         binding.stepScheduleList.text = DefaultSchedule.blocks.joinToString("\n") { block ->
             val days = if (block.days.contains(DayOfWeek.SATURDAY)) "Sat, Sun" else "Mon to Fri"
@@ -136,6 +146,12 @@ class OnboardingFragment : Fragment() {
             binding.stepScheduleAction.setActive(info != null && !hasSchedule)
         }
         refreshTodoistStatus()
+        val serviceOn = isAccessServiceEnabled(ctx)
+        binding.stepEnforceStatus.text = getString(if (serviceOn) R.string.onboarding_enforce_on else R.string.onboarding_enforce_off)
+        binding.enforceAccessibility.setActive(!serviceOn)
+        val notifyOn = ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        binding.stepNotifyStatus.text = getString(if (notifyOn) R.string.onboarding_notifications_on else R.string.onboarding_notifications_off)
+        binding.enforceNotifications.setActive(!notifyOn)
     }
 
     private fun refreshTodoistStatus() {

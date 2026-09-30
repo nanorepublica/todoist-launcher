@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Placeholder the accessibility service watches for double-tap-to-lock -->
+    <FrameLayout
+        android:id="@+id/lock"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:contentDescription="@string/lock_layout_description" />
+
+    <ScrollView
+        android:id="@+id/homeScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/homeColumn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="40dp"
+            android:paddingBottom="48dp">
+
+            <TextView
+                android:id="@+id/tvStage"
+                style="@style/TextSmallBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingVertical="4dp"
+                tools:text="Work AM · until 12:30" />
+
+            <TextClock
+                android:id="@+id/clock"
+                style="@style/TextDefault"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:format12Hour="h:mm"
+                android:format24Hour="HH:mm"
+                android:textSize="@dimen/time_size"
+                tools:text="02:34" />
+
+            <TextView
+                android:id="@+id/date"
+                style="@style/TextDefault"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="3dp"
+                android:textSize="@dimen/date_size"
+                tools:text="Wed, 30 Sep" />
+
+            <TextView
+                android:id="@+id/tvSession"
+                style="@style/TextSmallBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:paddingVertical="4dp"
+                android:visibility="gone"
+                tools:text="Instagram · 4:12 left"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/tvTasksHeader"
+                style="@style/TextSmallBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:paddingVertical="4dp"
+                tools:text="Today" />
+
+            <LinearLayout
+                android:id="@+id/tasksList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/tvAppsHeader"
+                style="@style/TextSmallBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:paddingVertical="4dp"
+                android:text="@string/apps_header" />
+
+            <LinearLayout
+                android:id="@+id/appsList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/tvHint"
+                style="@style/TextSmallLight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/home_hint"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

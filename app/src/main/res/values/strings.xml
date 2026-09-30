@@ -66,6 +66,31 @@
     <string name="todoist_syncing">Syncing…</string>
     <string name="todoist_labels_note">Labels used by the stages (phone/morning, phone/kidsdown, phone/review) are created in Todoist on the first sync if missing.</string>
     <string name="sync_todoist_now">Sync Todoist now</string>
+    <string name="apps_header">Apps</string>
+    <string name="apps_header_empty">No apps allowed in this stage</string>
+    <string name="home_hint">Swipe right for all apps · long-press for settings</string>
+    <string name="search_apps">Search apps</string>
+    <string name="cap_minutes">%1$d min</string>
+    <string name="capped_session_started">%1$s: %2$d min, then back here</string>
+    <string name="session_remaining">%1$s · %2$s left</string>
+    <string name="friction_off_list">Not part of %1$s · bypass %2$d in this block</string>
+    <string name="friction_reason_label">Why? (optional)</string>
+    <string name="friction_reason_hint">One line is enough</string>
+    <string name="friction_limit_label">Time limit</string>
+    <string name="friction_wait">Wait %1$d s</string>
+    <string name="friction_no_wait">First bypass this block: no wait</string>
+    <string name="friction_ready">Ready</string>
+    <string name="friction_open">Open</string>
+    <string name="friction_open_for">Open for %1$d min</string>
+    <string name="cancel">Cancel</string>
+    <string name="onboarding_step_enforce">6. Time\'s up enforcement</string>
+    <string name="onboarding_enforce_why">When a time limit runs out, the launcher brings you back here. That needs the accessibility service, which only watches which app is in front. On Android 13+ a sideloaded app must first be allowed restricted settings: App info > three dots > Allow restricted settings.</string>
+    <string name="onboarding_open_accessibility">Open accessibility settings</string>
+    <string name="onboarding_allow_notifications">Allow notifications (fallback)</string>
+    <string name="onboarding_enforce_on">✓ Accessibility service on</string>
+    <string name="onboarding_enforce_off">○ Accessibility service off: time\'s up falls back to a notification</string>
+    <string name="onboarding_notifications_on">✓ Notifications allowed</string>
+    <string name="onboarding_notifications_off">○ Notifications not allowed</string>
     <string name="todoist_token_store_failed">Could not store the token securely on this phone</string>
     <string name="onboarding_create_google">Create in Google Calendar (web)</string>
     <string name="onboarding_google_hint">Opens the Google Calendar website. Name the new calendar \"Phone stages\", then come back: once it has synced to the phone it appears under Pick an existing calendar.</string>
@@ -131,7 +156,7 @@
         \n\nThe choice is always yours.</string>
     <string name="app_usage_message">To show/hide your screen time on the home screen, please allow or disallow the app usage permission.
         \n\nNote: No app usage data is collected. Everything is processed on your device.</string>
-    <string name="accessibility_service_description">The accessibility permission is required to enable the gesture - double tap to lock . Any data acquired by Olauncher via this service will not leave your device.</string>
+    <string name="accessibility_service_description">Context launcher uses this service to notice which app is in front, so it can bring you back to the home screen when a time limit runs out, and for the double-tap-to-lock gesture. Nothing it sees leaves the phone.</string>
     <string name="copy">Copy</string>
     <string name="close">Close</string>
     <string name="date">Date</string>

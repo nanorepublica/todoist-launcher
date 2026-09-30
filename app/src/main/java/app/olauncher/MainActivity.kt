@@ -127,6 +127,7 @@ class MainActivity : AppCompatActivity() {
         isResumed = true
         viewModel.isPrivateSpaceToggling = false
         viewModel.getAppList()
+        Graph.gate(this).onLauncherResumed()
         showOnboardingIfNeeded()
     }
 
