@@ -36,6 +36,7 @@ class LaunchSmokeTest {
     @Before
     fun setUp() {
         ShadowLog.stream = System.out
+        Graph.resetForTests()
         app = RuntimeEnvironment.getApplication() as Application
         // Skip Olauncher's 4-hourly recreate() on the very first start
         Prefs(app).launcherRestartTimestamp = System.currentTimeMillis()

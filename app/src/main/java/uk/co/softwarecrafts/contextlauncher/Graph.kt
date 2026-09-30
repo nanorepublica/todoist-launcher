@@ -25,6 +25,16 @@ object Graph {
             database ?: AppDatabase.build(context).also { database = it }
         }
 
+    /** Tests only: drop every singleton so the next test starts from a fresh process state. */
+    fun resetForTests() {
+        synchronized(this) {
+            engine?.close()
+            engine = null
+            database?.close()
+            database = null
+        }
+    }
+
     fun config(context: Context) = ConfigRepository(db(context).configDao())
     fun eventLog(context: Context) = EventLogRepository(db(context).eventDao())
     fun calendar(context: Context) = CalendarStore(context.applicationContext)

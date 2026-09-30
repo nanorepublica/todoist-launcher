@@ -86,6 +86,12 @@ class StageEngine(
         }
     }
 
+    /** Stops scheduled work. Only tests need this; the engine lives as long as the process. */
+    fun close() {
+        scheduled?.cancel()
+        scope.coroutineContext[Job]?.cancel()
+    }
+
     fun refresh() {
         scope.launch { resolveNow() }
     }
