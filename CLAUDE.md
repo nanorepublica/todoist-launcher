@@ -113,5 +113,16 @@ included build. `core/settings.gradle` reuses the root version catalog.
 6. Usage logging and weekly review with one-tap Apply suggestions.
 7. Settings screens.
 
-Open spec questions and the defaults in use are tracked in the session
-conversation until settled; settled ones get recorded here.
+## Spec defaults in use (agreed, override in settings later)
+
+- Weekday default stage for calendar gaps: "Default", Work allowlist, no cap.
+- "Most restrictive" on overlap: an explicit restrictiveness rank on each
+  stage, editable in settings. Weekly review ranks highest, Default lowest.
+- After a task stage unlocks early: the stage ends and the phone falls to the
+  next calendar block or the gap default; post-completion perks (10 min of
+  daily games after the morning routine) run alongside.
+- Capped allowed apps (YouTube in Family): launch directly with the timer
+  running, no reason prompt, not counted as a bypass.
+- Task-linked app groups: only tasks due today or overdue unlock their group.
+- Weekly review "falls due": due date is today or earlier; if the task has a
+  time, that time has passed.
