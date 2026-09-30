@@ -5,6 +5,8 @@ import android.database.ContentObserver
 import android.os.Handler
 import android.os.Looper
 import android.provider.CalendarContract
+import android.util.Log
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -54,23 +56,34 @@ class StageEngine(
     var taskSource: TaskSource = TaskSource { emptyList() },
 ) {
     private val appContext = context.applicationContext
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val _state = MutableStateFlow<StageState>(StageState.Loading)
+
+    /** A failure inside a resolve must never take the launcher down: report it on the home screen instead. */
+    private val crashGuard = CoroutineExceptionHandler { _, e ->
+        Log.e(TAG, "stage resolve failed", e)
+        _state.value = StageState.SetupNeeded("Error: ${e.javaClass.simpleName}: ${e.message}")
+    }
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + crashGuard)
     private val resolver = StageResolver(clock)
     private val tracker = StageTracker()
     private val lock = Mutex()
     private var scheduled: Job? = null
 
-    private val _state = MutableStateFlow<StageState>(StageState.Loading)
     val state: StateFlow<StageState> = _state
     val zone: java.time.ZoneId get() = clock.zone
 
     init {
-        appContext.contentResolver.registerContentObserver(
-            CalendarContract.CONTENT_URI, true,
-            object : ContentObserver(Handler(Looper.getMainLooper())) {
-                override fun onChange(selfChange: Boolean) = refresh()
-            },
-        )
+        try {
+            appContext.contentResolver.registerContentObserver(
+                CalendarContract.CONTENT_URI, true,
+                object : ContentObserver(Handler(Looper.getMainLooper())) {
+                    override fun onChange(selfChange: Boolean) = refresh()
+                },
+            )
+        } catch (e: RuntimeException) {
+            // Without the observer the engine still re-resolves on resume and at boundaries
+            Log.w(TAG, "calendar observer not registered", e)
+        }
     }
 
     fun refresh() {
@@ -107,6 +120,10 @@ class StageEngine(
         }
         _state.value = StageState.Ready(resolution)
         scheduleNext(resolution)
+    }
+
+    private companion object {
+        const val TAG = "StageEngine"
     }
 
     private fun scheduleNext(resolution: Resolution) {

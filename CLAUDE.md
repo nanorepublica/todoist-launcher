@@ -18,9 +18,16 @@ cd core && ../gradlew test
 ./gradlew :app:assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 
-# App unit tests
+# App unit tests, including the Robolectric launch smoke test that boots
+# MainActivity in the JVM (first run -> onboarding; after setup -> resolve)
 ./gradlew :app:testDebugUnitTest
 ```
+
+If Robolectric fails to fetch `android-all-instrumented` with HTTP 429, the
+session proxy capped its parallel downloads: fetch the jar, .pom and both
+.sha512 files one at a time with curl into
+`~/.m2/repository/org/robolectric/android-all-instrumented/<version>/` and
+rerun.
 
 The debug build installs as `uk.co.softwarecrafts.contextlauncher.debug`, so
 it sits beside any other launcher. Set it as default from the phone's
@@ -60,6 +67,8 @@ app/                            Android app (Olauncher fork)
     data/ConfigRepository.kt    load/save/seed/export/import of LauncherConfig
     data/EventLogRepository.kt  append-only usage log
     ui/ConfigTransfer.kt        JSON export/import via the system file picker
+  src/test/java/uk/co/softwarecrafts/contextlauncher/
+    LaunchSmokeTest.kt          Robolectric boot test; add a case per new screen
     ui/OnboardingFragment.kt    first-run setup, re-openable from Settings > Context
     calendar/CalendarStore.kt   CalendarContract: list, create local, read, seed
     engine/StageEngine.kt       StateFlow<StageState>; re-resolves on resume,

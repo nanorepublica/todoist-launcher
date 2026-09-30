@@ -37,7 +37,6 @@ import app.olauncher.helper.showMessageDialog
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import uk.co.softwarecrafts.contextlauncher.Graph
 import uk.co.softwarecrafts.contextlauncher.data.AppPrefs
 
 class MainActivity : AppCompatActivity() {
@@ -76,7 +75,6 @@ class MainActivity : AppCompatActivity() {
 
         navController = this.findNavController(R.id.nav_host_fragment)
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        lifecycleScope.launch { Graph.config(this@MainActivity).seedIfEmpty() }
 
         val onBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
