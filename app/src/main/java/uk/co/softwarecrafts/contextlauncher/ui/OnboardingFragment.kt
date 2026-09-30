@@ -2,7 +2,6 @@ package uk.co.softwarecrafts.contextlauncher.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,7 +13,11 @@ import app.olauncher.MainViewModel
 import app.olauncher.R
 import app.olauncher.databinding.FragmentOnboardingBinding
 import app.olauncher.helper.isDefaultLauncher
-import app.olauncher.helper.showPopupMenu
+import app.olauncher.helper.OlDialog
+import app.olauncher.helper.createDialog
+import android.widget.LinearLayout
+import android.widget.TextView
+import java.time.Duration
 import app.olauncher.helper.showToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,6 +42,7 @@ class OnboardingFragment : Fragment() {
     private lateinit var prefs: AppPrefs
     private lateinit var calendar: CalendarStore
     private var calendars: List<CalendarStore.CalendarInfo> = emptyList()
+    private var pickerDialog: OlDialog? = null
 
     private val requestCalendar = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         refreshStatus()
@@ -92,6 +96,18 @@ class OnboardingFragment : Fragment() {
                 info.isLocal -> getString(R.string.onboarding_calendar_local, name)
                 else -> getString(R.string.onboarding_calendar_synced, name, info.account)
             }
+            val visible = withContext(Dispatchers.IO) { if (hasPermission) calendar.listCalendars().size else 0 }
+            val blocksToday = withContext(Dispatchers.IO) {
+                if (info == null) null else {
+                    val now = Graph.clock.now()
+                    calendar.instances(info.id, now.minus(Duration.ofHours(12)), now.plus(Duration.ofHours(12))).size
+                }
+            }
+            binding.stepCalendarDetail.text = buildString {
+                append(getString(R.string.onboarding_calendars_visible, visible))
+                if (blocksToday != null) append("\n").append(getString(R.string.onboarding_blocks_today, blocksToday))
+                if (info?.isLocal == true) append("\n\n").append(getString(R.string.onboarding_local_note))
+            }
             val hasSchedule = info != null && withContext(Dispatchers.IO) { calendar.hasDefaultSchedule(info.id) }
             binding.stepScheduleStatus.text = getString(
                 when {
@@ -120,25 +136,41 @@ class OnboardingFragment : Fragment() {
         }
     }
 
-    private fun pickCalendar(anchor: View) {
+    private fun pickCalendar(@Suppress("UNUSED_PARAMETER") anchor: View) {
         calendars = calendar.listCalendars()
         if (calendars.isEmpty()) {
             requireContext().showToast(getString(R.string.onboarding_no_calendars))
             return
         }
-        anchor.showPopupMenu(configure = { menu ->
-            calendars.forEachIndexed { i, cal ->
-                val label = if (cal.isLocal) "${cal.name} (this phone)" else "${cal.name} (${cal.account})"
-                menu.add(Menu.NONE, i, i, label)
+        pickerDialog?.dismiss()
+        val dialog = requireContext().createDialog(
+            title = R.string.choose_calendar,
+            action = R.string.close,
+        ) { container ->
+            LinearLayout(container.context).apply {
+                orientation = LinearLayout.VERTICAL
+                calendars.forEach { cal ->
+                    addView(TextView(context, null, 0, R.style.TextSmall).apply {
+                        text = if (cal.isLocal) "${cal.name} (this phone)" else "${cal.name} (${cal.account})"
+                        setPadding(24, 20, 24, 20)
+                        setOnClickListener {
+                            pickerDialog?.dismiss()
+                            chooseCalendar(cal)
+                        }
+                    })
+                }
             }
-        }) { item ->
-            val chosen = calendars[item.itemId]
-            val ctx = requireContext().applicationContext
-            viewLifecycleOwner.lifecycleScope.launch {
-                withContext(Dispatchers.IO) { saveCalendarName(chosen.name) }
-                Graph.stageEngine(ctx).refresh()
-                refreshStatus()
-            }
+        }
+        pickerDialog = dialog
+        dialog.showRespectingStatusBar()
+    }
+
+    private fun chooseCalendar(chosen: CalendarStore.CalendarInfo) {
+        val ctx = requireContext().applicationContext
+        viewLifecycleOwner.lifecycleScope.launch {
+            withContext(Dispatchers.IO) { saveCalendarName(chosen.name) }
+            Graph.stageEngine(ctx).refresh()
+            refreshStatus()
         }
     }
 
@@ -174,6 +206,8 @@ class OnboardingFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        pickerDialog?.dismiss()
+        pickerDialog = null
         super.onDestroyView()
         _binding = null
     }

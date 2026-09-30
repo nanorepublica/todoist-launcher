@@ -11,5 +11,7 @@
     <attr name="primaryShadeColor" format="color" />
     <attr name="dialogShadeColor" format="color" />
     <attr name="primaryShadeDarkColor" format="color" />
+    <!-- Near-opaque page background for text-heavy screens (settings, setup) -->
+    <attr name="pageBackgroundColor" format="color" />
     <attr name="mainFontFamily" format="string" />
 </resources>
