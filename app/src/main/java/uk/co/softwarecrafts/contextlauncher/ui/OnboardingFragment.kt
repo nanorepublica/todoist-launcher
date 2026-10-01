@@ -28,6 +28,7 @@ import uk.co.softwarecrafts.contextlauncher.Graph
 import uk.co.softwarecrafts.contextlauncher.calendar.CalendarStore
 import uk.co.softwarecrafts.contextlauncher.core.stage.DefaultSchedule
 import uk.co.softwarecrafts.contextlauncher.data.AppPrefs
+import uk.co.softwarecrafts.contextlauncher.usage.UsageReader
 import uk.co.softwarecrafts.contextlauncher.voice.Ramble
 import uk.co.softwarecrafts.contextlauncher.data.todoist.SyncStatus
 import uk.co.softwarecrafts.contextlauncher.data.todoist.TodoistSyncWorker
@@ -93,6 +94,10 @@ class OnboardingFragment : Fragment() {
         binding.enforceAccessibility.setOnClickListener { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
         binding.enforceNotifications.setOnClickListener { requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS) }
         binding.voiceAllowMic.setOnClickListener { requestMic.launch(Manifest.permission.RECORD_AUDIO) }
+        binding.usageAllow.setOnClickListener {
+            runCatching { startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }
+                .onFailure { requireContext().showToast(getString(R.string.review_usage_settings_missing)) }
+        }
         binding.voiceSpeechSettings.setOnClickListener {
             runCatching { startActivity(Intent("com.android.settings.action.SPEECH_RECOGNITION_SETTINGS")) }
                 .recoverCatching { startActivity(Intent(Settings.ACTION_VOICE_INPUT_SETTINGS)) }
@@ -160,6 +165,9 @@ class OnboardingFragment : Fragment() {
         binding.stepNotifyStatus.text = getString(if (notifyOn) R.string.onboarding_notifications_on else R.string.onboarding_notifications_off)
         binding.enforceNotifications.setActive(!notifyOn)
         refreshVoiceStatus(ctx)
+        val usageOn = UsageReader(ctx).hasPermission()
+        binding.stepUsageStatus.text = getString(if (usageOn) R.string.onboarding_usage_on else R.string.onboarding_usage_off)
+        binding.usageAllow.setActive(!usageOn)
     }
 
     private fun refreshVoiceStatus(ctx: android.content.Context) {

@@ -32,6 +32,13 @@
             app:popEnterAnim="@anim/fade_enter"
             app:popExitAnim="@anim/fade_exit" />
         <action
+            android:id="@+id/action_mainFragment_to_reviewFragment"
+            app:destination="@id/reviewFragment"
+            app:enterAnim="@anim/fade_enter"
+            app:exitAnim="@anim/fade_exit"
+            app:popEnterAnim="@anim/fade_enter"
+            app:popExitAnim="@anim/fade_exit" />
+        <action
             android:id="@+id/action_mainFragment_to_settingsFragment"
             app:destination="@id/settingsFragment"
             app:enterAnim="@anim/fade_enter"
@@ -79,6 +86,12 @@
             app:popEnterAnim="@anim/fade_enter"
             app:popExitAnim="@anim/fade_exit" />
     </fragment>
+
+    <fragment
+        android:id="@+id/reviewFragment"
+        android:name="uk.co.softwarecrafts.contextlauncher.ui.ReviewFragment"
+        android:label="review_fragment"
+        tools:layout="@layout/fragment_review" />
 
     <fragment
         android:id="@+id/onboardingFragment"

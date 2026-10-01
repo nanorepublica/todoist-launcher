@@ -98,6 +98,7 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
             R.id.setLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.runSetup -> findNavController().navigate(R.id.action_settingsFragment_to_onboardingFragment)
             R.id.syncTodoist -> syncTodoistNow()
+            R.id.weeklyReview -> findNavController().navigate(R.id.reviewFragment)
             R.id.hiddenApps -> showHiddenAppsDialog()
             R.id.exportConfig -> configTransfer.export()
             R.id.importConfig -> showDialog(
@@ -139,6 +140,7 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
         binding.setLauncher.setOnClickListener(this)
         binding.runSetup.setOnClickListener(this)
         binding.syncTodoist.setOnClickListener(this)
+        binding.weeklyReview.setOnClickListener(this)
         binding.hiddenApps.setOnClickListener(this)
         binding.exportConfig.setOnClickListener(this)
         binding.importConfig.setOnClickListener(this)

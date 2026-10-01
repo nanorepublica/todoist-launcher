@@ -42,7 +42,9 @@ import uk.co.softwarecrafts.contextlauncher.core.gate.AllowedEntry
 import uk.co.softwarecrafts.contextlauncher.core.config.AppGroup
 import uk.co.softwarecrafts.contextlauncher.core.config.GroupKind
 import uk.co.softwarecrafts.contextlauncher.core.gate.TimedSession
+import uk.co.softwarecrafts.contextlauncher.core.stage.Activation
 import uk.co.softwarecrafts.contextlauncher.core.stage.TaskSnapshot
+import uk.co.softwarecrafts.contextlauncher.data.AppPrefs
 import uk.co.softwarecrafts.contextlauncher.core.todoist.TodayTasks
 import uk.co.softwarecrafts.contextlauncher.engine.StageState
 import uk.co.softwarecrafts.contextlauncher.voice.Ramble
@@ -86,8 +88,11 @@ class HomeFragment : Fragment() {
         binding.clock.setOnClickListener { openAlarmApp(requireContext()) }
         binding.date.setOnClickListener { openCalendar(requireContext()) }
         binding.tvStage.setOnClickListener {
-            if (Graph.stageEngine(requireContext()).state.value is StageState.SetupNeeded)
-                findNavController().navigate(R.id.action_mainFragment_to_onboardingFragment)
+            val state = Graph.stageEngine(requireContext()).state.value
+            when {
+                state is StageState.SetupNeeded -> findNavController().navigate(R.id.action_mainFragment_to_onboardingFragment)
+                state is StageState.Ready && state.resolution.current is Activation.TaskDue -> openReview()
+            }
         }
         binding.tvTasksHeader.setOnClickListener {
             if (!Graph.todoist(requireContext()).hasToken)
@@ -137,8 +142,27 @@ class HomeFragment : Fragment() {
                     allowed = Graph.gate(requireContext()).allowed()
                     unrestrictedGroups = Graph.config(requireContext()).load().groups(GroupKind.UNRESTRICTED)
                     renderApps()
+                    maybeOpenReview(state)
                 }
             }
+        }
+    }
+
+    /** The weekly review is forced: it opens itself once each time a @phone/review task falls due. */
+    private fun maybeOpenReview(state: StageState) {
+        val due = ((state as? StageState.Ready)?.resolution?.current as? Activation.TaskDue) ?: return
+        val prefs = AppPrefs(requireContext())
+        if (prefs.reviewOpenedForTask == due.taskId) return
+        if (findNavController().currentDestination?.id != R.id.mainFragment) return
+        prefs.reviewOpenedForTask = due.taskId
+        openReview()
+    }
+
+    private fun openReview() {
+        try {
+            findNavController().navigate(R.id.action_mainFragment_to_reviewFragment)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

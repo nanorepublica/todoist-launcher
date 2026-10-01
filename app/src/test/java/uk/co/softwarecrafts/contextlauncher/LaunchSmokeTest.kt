@@ -69,7 +69,7 @@ class LaunchSmokeTest {
     }
 
     @Test
-    fun `app list, friction and settings screens inflate`() {
+    fun `app list, friction, speak, review and settings screens inflate`() {
         AppPrefs(app).onboardingDone = true
         val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
         ShadowLooper.idleMainLooper()
@@ -94,6 +94,11 @@ class LaunchSmokeTest {
         nav.navigate(R.id.action_mainFragment_to_speakFragment)
         ShadowLooper.idleMainLooper()
         assertEquals(R.id.speakFragment, nav.currentDestination?.id)
+
+        nav.popBackStack(R.id.mainFragment, false)
+        nav.navigate(R.id.action_mainFragment_to_reviewFragment)
+        ShadowLooper.idleMainLooper()
+        assertEquals(R.id.reviewFragment, nav.currentDestination?.id)
 
         nav.popBackStack(R.id.mainFragment, false)
         nav.navigate(R.id.action_mainFragment_to_settingsFragment)

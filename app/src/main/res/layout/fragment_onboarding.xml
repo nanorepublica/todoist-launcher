@@ -294,6 +294,34 @@
             style="@style/SetupButton"
             android:text="@string/onboarding_open_speech_settings" />
 
+        <!-- Step 8: usage access -->
+        <TextView
+            style="@style/TextMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/onboarding_step_usage"
+            android:textColor="?attr/primaryColor" />
+
+        <TextView
+            style="@style/TextSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/onboarding_usage_why" />
+
+        <TextView
+            android:id="@+id/stepUsageStatus"
+            style="@style/TextSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/onboarding_usage_off" />
+
+        <TextView
+            android:id="@+id/usageAllow"
+            style="@style/SetupButton"
+            android:text="@string/onboarding_allow_usage" />
+
         <TextView
             android:id="@+id/finish"
             style="@style/SetupButton"

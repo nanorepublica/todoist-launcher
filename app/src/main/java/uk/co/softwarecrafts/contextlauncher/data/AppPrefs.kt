@@ -16,6 +16,11 @@ class AppPrefs(context: Context) {
         get() = prefs.getBoolean(ONBOARDING_DONE, false)
         set(value) = prefs.edit { putBoolean(ONBOARDING_DONE, value) }
 
+    /** The @phone/review task the review screen was last opened for automatically, so it opens once per due task. */
+    var reviewOpenedForTask: String?
+        get() = prefs.getString(REVIEW_OPENED_TASK, null)
+        set(value) = prefs.edit { if (value == null) remove(REVIEW_OPENED_TASK) else putString(REVIEW_OPENED_TASK, value) }
+
     fun loadBypassCounter(): BypassCounter =
         BypassCounter(prefs.getString(COUNTER_KEY, "") ?: "", prefs.getInt(COUNTER_COUNT, 0))
 
@@ -55,6 +60,7 @@ class AppPrefs(context: Context) {
 
     private companion object {
         const val ONBOARDING_DONE = "onboarding_done"
+        const val REVIEW_OPENED_TASK = "review_opened_task"
         const val COUNTER_KEY = "bypass_block"
         const val COUNTER_COUNT = "bypass_count"
         const val S_PACKAGE = "session_package"
