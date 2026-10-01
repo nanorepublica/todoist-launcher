@@ -30,8 +30,9 @@ cd core && ../gradlew test
 
 ## Status
 
-Personal use first, built for a Fairphone 5. Phase 0 (fork baseline) is done;
-see the phase plan in CLAUDE.md.
+Personal use first, built for a Fairphone 5. Phases 0 to 6 (fork, data layer,
+stage engine, Todoist, home and gating, voice, weekly review) are done; settings
+screens are next. See the phase plan in CLAUDE.md.
 
 ## Credits and license
 

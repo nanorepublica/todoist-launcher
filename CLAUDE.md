@@ -62,6 +62,10 @@ core/                           standalone Gradle build, pure Kotlin/JVM
     todoist/TaskCache.kt        pure merge rules for full/incremental sync
     todoist/TodayTasks.kt       home-screen rows: gating first, then overdue
     voice/Destinations.kt       which speak destinations a stage offers
+    review/Usage.kt             ForegroundInterval, StageTimeline (from STAGE_CHANGE), per-stage attribution
+    review/ReviewReport.kt      ReviewBuilder: bypass/capped/times-up stats for a period
+    review/Suggestions.kt       SuggestionRules -> Suggestion(text, ConfigChange.apply(config))
+    review/UsageExport.kt       JSON export of events + attributed app time
     gate/AllowedApps.kt         Gatekeeper: allowlist for a resolution + launch decision
     gate/Escalation.kt          0/10/15/30 s ladder, per-block BypassCounter, limit options
     gate/TimedSession.kt        one running timed session + SessionRules for enforcement
@@ -92,6 +96,9 @@ app/                            Android app (Olauncher fork)
     data/todoist/TodoistRepository.kt  cache in Room, complete/quick-add, is the engine's TaskSource
     data/todoist/TokenStore.kt  EncryptedSharedPreferences (todoist_secure, backup-excluded)
     data/todoist/TodoistSyncWorker.kt  15-minute WorkManager refresh
+    usage/UsageReader.kt        UsageStatsManager (via Olauncher's EventLogWrapper) -> core intervals
+    review/ReviewController.kt  7-day report, labels, apply + log CONFIG_CHANGE, export, finish
+    ui/ReviewFragment.kt        weekly review: summary, suggestions with Apply, export, Finish
   src/main/java/app/olauncher/  borrowed Olauncher code, package kept as-is
     MainActivity.kt             single activity, nav host, back handling
     MainViewModel.kt            app list, launching, home apps, screen time
@@ -196,7 +203,17 @@ included build. `core/settings.gradle` reuses the root version catalog.
    plain Todoist; long-press is a typed quick add. Setup step 7 shows the device
    checks: mic permission, on-device recognition, Claude installed, Todoist
    shortcuts seen.
-6. Usage logging and weekly review with one-tap Apply suggestions.
+6. Usage logging and weekly review (done): per-app foreground time from
+   UsageStatsManager (usage access is Setup step 8) attributed to stages via
+   STAGE_CHANGE events; the review screen opens itself once when a
+   `@phone/review` task falls due (tap the stage line to reopen; also in
+   Settings > Context), shows the last 7 days (bypasses per app and stage
+   with chosen limits and reasons, times-up, app time, task completions),
+   rule-based suggestions with one-tap Apply (lower a stage cap that keeps
+   running out, cap an uncapped stage, allow a short-visit app with a cap,
+   lower an allowed app's cap) that save through ConfigRepository and log
+   CONFIG_CHANGE, JSON export via the file picker, and Finish, which logs
+   REVIEW_COMPLETED and closes the review task through item_close.
 7. Settings screens.
 
 ## Spec defaults in use (agreed, override in settings later)
@@ -219,6 +236,10 @@ included build. `core/settings.gradle` reuses the root version catalog.
   completions from `/tasks/completed/by_completion_date`; incremental syncs
   carry completions as `checked` items. Completing from the launcher is
   optimistic and reverted on failure.
+- Review suggestions need at least 3 bypasses of one app in one stage over
+  the 7 days (`SuggestionRules.MIN_BYPASSES`); caps step down the 1/2/5/10/
+  15/30/60 ladder. Android keeps usage events for roughly a week, so the
+  review period is 7 days ending now, not a calendar week.
 - A task stage with no tasks carrying its label today simply runs its
   calendar block; "done" needs at least one such task, all complete.
 - The home screen lists tasks due today only (SPEC.md lines 49 and 55).
