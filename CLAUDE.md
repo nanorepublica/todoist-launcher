@@ -99,6 +99,12 @@ app/                            Android app (Olauncher fork)
     usage/UsageReader.kt        UsageStatsManager (via Olauncher's EventLogWrapper) -> core intervals
     review/ReviewController.kt  7-day report, labels, apply + log CONFIG_CHANGE, export, finish
     ui/ReviewFragment.kt        weekly review: summary, suggestions with Apply, export, Finish
+    ui/settings/FormDialogs.kt  text / number / time / choice / multi-choice dialogs
+    ui/settings/FormFragment.kt base: title, tappable rows, Save/Delete/Cancel, validated commit
+    ui/settings/ConfigListFragment.kt   stages (by rank) or app groups; tap to edit, Add
+    ui/settings/StageEditFragment.kt    every Stage field, trigger parameters by type
+    ui/settings/GroupEditFragment.kt    name, kind, members with caps
+    ui/settings/ContextSettingsFragment.kt calendar, always allowed, label groups, Claude
   src/main/java/app/olauncher/  borrowed Olauncher code, package kept as-is
     MainActivity.kt             single activity, nav host, back handling
     MainViewModel.kt            app list, launching, home apps, screen time
@@ -132,6 +138,9 @@ included build. `core/settings.gradle` reuses the root version catalog.
   changes: bump AppDatabase.VERSION, add a Migration, commit app/schemas.
 - Dependencies come from `Graph` (a small service locator), not a DI
   framework.
+- Settings forms are rows plus dialogs (`ui/settings`), not preference XML:
+  text-only, same look as the rest of the launcher, and every write goes
+  through the validator.
 - The Todoist token is entered in-app and stored with
   `androidx.security:security-crypto` EncryptedSharedPreferences (deprecated
   upstream but functional). It is excluded from Android auto-backup. Nothing
@@ -214,7 +223,14 @@ included build. `core/settings.gradle` reuses the root version catalog.
    lower an allowed app's cap) that save through ConfigRepository and log
    CONFIG_CHANGE, JSON export via the file picker, and Finish, which logs
    REVIEW_COMPLETED and closes the review task through item_close.
-7. Settings screens.
+7. Settings screens (done): Settings > Context gains Stages, App groups and
+   Context settings. All four screens share `fragment_form.xml` and
+   `FormFragment`: rows open small dialogs, drafts are rendered from scratch
+   on every change, Save goes through `ConfigRepository.update` (so the
+   validator can reject it, shown as "Not saved: ...") and logs
+   CONFIG_CHANGE. New ids are slugs of the name; deleting a group also
+   removes it from stages, perks and label mappings. Context settings save
+   each row at once. Smoke test opens every form.
 
 ## Spec defaults in use (agreed, override in settings later)
 
