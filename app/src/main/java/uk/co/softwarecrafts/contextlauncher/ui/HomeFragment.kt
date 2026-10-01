@@ -48,10 +48,8 @@ import uk.co.softwarecrafts.contextlauncher.data.AppPrefs
 import uk.co.softwarecrafts.contextlauncher.core.todoist.TodayTasks
 import uk.co.softwarecrafts.contextlauncher.engine.StageState
 import uk.co.softwarecrafts.contextlauncher.voice.Ramble
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import java.util.Locale
 
 /**
@@ -80,11 +78,10 @@ class HomeFragment : Fragment() {
         prefs = Prefs(requireContext())
         viewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
 
-        // Not on the ScrollView: it must keep its own touch handling for overflow scrolling.
-        // The column fills the viewport, so it receives touches everywhere else.
-        val gestures = gestureListener(requireContext())
-        binding.mainLayout.setOnTouchListener(gestures)
-        binding.homeColumn.setOnTouchListener(gestures)
+        // The root watches every touch (rows included) and takes over sideways drags,
+        // and vertical ones while the column fits the screen; otherwise the ScrollView scrolls.
+        binding.mainLayout.gestures = gestureListener(requireContext())
+        binding.mainLayout.verticalScrollable = { binding.homeScroll.canScrollVertically(1) || binding.homeScroll.canScrollVertically(-1) }
         binding.clock.setOnClickListener { openAlarmApp(requireContext()) }
         binding.date.setOnClickListener { openCalendar(requireContext()) }
         binding.tvStage.setOnClickListener {
@@ -110,6 +107,7 @@ class HomeFragment : Fragment() {
         observeStage()
         observeTasks()
         observeSession()
+        observeClock()
     }
 
     override fun onResume() {
@@ -118,8 +116,30 @@ class HomeFragment : Fragment() {
         Graph.gate(appContext).onLauncherResumed()
         Graph.stageEngine(appContext).refresh()
         viewLifecycleOwner.lifecycleScope.launch { Graph.todoist(appContext).syncIfStale() }
-        binding.date.text = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(Date())
+        renderDate()
         if (prefs.showStatusBar) requireActivity().window.showStatusBar() else requireActivity().window.hideStatusBar()
+    }
+
+    // ---- clock (follows Graph.clock, so debug time travel shows on the home) ----
+
+    private fun observeClock() {
+        val twentyFour = android.text.format.DateFormat.is24HourFormat(requireContext())
+        val format = DateTimeFormatter.ofPattern(if (twentyFour) "HH:mm" else "h:mm")
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                var lastDay = Graph.clock.today()
+                while (isActive) {
+                    val now = Graph.clock.localNow()
+                    binding.clock.text = now.format(format)
+                    if (now.toLocalDate() != lastDay) { lastDay = now.toLocalDate(); renderDate() }
+                    delay(1_000L - (System.currentTimeMillis() % 1_000L))
+                }
+            }
+        }
+    }
+
+    private fun renderDate() {
+        _binding?.date?.text = Graph.clock.today().format(DateTimeFormatter.ofPattern("EEE, d MMM", Locale.getDefault()))
     }
 
     // ---- stage line and allowed apps ----
