@@ -94,6 +94,30 @@
         tools:layout="@layout/fragment_review" />
 
     <fragment
+        android:id="@+id/configListFragment"
+        android:name="uk.co.softwarecrafts.contextlauncher.ui.settings.ConfigListFragment"
+        android:label="config_list_fragment"
+        tools:layout="@layout/fragment_form" />
+
+    <fragment
+        android:id="@+id/stageEditFragment"
+        android:name="uk.co.softwarecrafts.contextlauncher.ui.settings.StageEditFragment"
+        android:label="stage_edit_fragment"
+        tools:layout="@layout/fragment_form" />
+
+    <fragment
+        android:id="@+id/groupEditFragment"
+        android:name="uk.co.softwarecrafts.contextlauncher.ui.settings.GroupEditFragment"
+        android:label="group_edit_fragment"
+        tools:layout="@layout/fragment_form" />
+
+    <fragment
+        android:id="@+id/contextSettingsFragment"
+        android:name="uk.co.softwarecrafts.contextlauncher.ui.settings.ContextSettingsFragment"
+        android:label="context_settings_fragment"
+        tools:layout="@layout/fragment_form" />
+
+    <fragment
         android:id="@+id/onboardingFragment"
         android:name="uk.co.softwarecrafts.contextlauncher.ui.OnboardingFragment"
         android:label="OnboardingFragment"

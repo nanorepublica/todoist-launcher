@@ -21,6 +21,9 @@ import org.robolectric.shadows.ShadowLooper
 import uk.co.softwarecrafts.contextlauncher.data.AppPrefs
 import uk.co.softwarecrafts.contextlauncher.engine.StageEngine
 import uk.co.softwarecrafts.contextlauncher.engine.StageState
+import uk.co.softwarecrafts.contextlauncher.ui.settings.ConfigListFragment
+import uk.co.softwarecrafts.contextlauncher.ui.settings.GroupEditFragment
+import uk.co.softwarecrafts.contextlauncher.ui.settings.StageEditFragment
 
 /**
  * Boots the launcher in the JVM the way the phone does: onCreate, onStart,
@@ -104,6 +107,34 @@ class LaunchSmokeTest {
         nav.navigate(R.id.action_mainFragment_to_settingsFragment)
         ShadowLooper.idleMainLooper()
         assertEquals(R.id.settingsFragment, nav.currentDestination?.id)
+        controller.pause().stop().destroy()
+    }
+
+    @Test
+    fun `settings forms inflate for stages, groups and context settings`() {
+        AppPrefs(app).onboardingDone = true
+        val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
+        ShadowLooper.idleMainLooper()
+        val nav = controller.get().findNavController(R.id.nav_host_fragment)
+        awaitResolved(Graph.stageEngine(app)) // seeds the config
+
+        val stages = androidx.core.os.bundleOf(ConfigListFragment.ARG_SECTION to ConfigListFragment.SECTION_STAGES)
+        val groups = androidx.core.os.bundleOf(ConfigListFragment.ARG_SECTION to ConfigListFragment.SECTION_GROUPS)
+        listOf(
+            R.id.configListFragment to stages,
+            R.id.configListFragment to groups,
+            R.id.stageEditFragment to androidx.core.os.bundleOf(StageEditFragment.ARG_STAGE_ID to "work_am"),
+            R.id.stageEditFragment to androidx.core.os.bundleOf(StageEditFragment.ARG_STAGE_ID to ""),
+            R.id.groupEditFragment to androidx.core.os.bundleOf(GroupEditFragment.ARG_GROUP_ID to "work"),
+            R.id.contextSettingsFragment to null,
+        ).forEach { (dest, args) ->
+            nav.navigate(dest, args)
+            ShadowLooper.idleMainLooper()
+            Thread.sleep(200) // let the config load and render
+            ShadowLooper.idleMainLooper()
+            assertEquals(dest, nav.currentDestination?.id)
+            nav.popBackStack(R.id.mainFragment, false)
+        }
         controller.pause().stop().destroy()
     }
 

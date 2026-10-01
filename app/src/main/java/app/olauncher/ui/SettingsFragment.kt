@@ -42,6 +42,7 @@ import app.olauncher.helper.showStatusBar
 import app.olauncher.helper.showToast
 import app.olauncher.listener.DeviceAdmin
 import uk.co.softwarecrafts.contextlauncher.ui.ConfigTransfer
+import uk.co.softwarecrafts.contextlauncher.ui.settings.ConfigListFragment
 
 class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListener {
 
@@ -98,6 +99,9 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
             R.id.setLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.runSetup -> findNavController().navigate(R.id.action_settingsFragment_to_onboardingFragment)
             R.id.syncTodoist -> syncTodoistNow()
+            R.id.stagesRow -> findNavController().navigate(R.id.configListFragment, androidx.core.os.bundleOf(ConfigListFragment.ARG_SECTION to ConfigListFragment.SECTION_STAGES))
+            R.id.groupsRow -> findNavController().navigate(R.id.configListFragment, androidx.core.os.bundleOf(ConfigListFragment.ARG_SECTION to ConfigListFragment.SECTION_GROUPS))
+            R.id.contextSettingsRow -> findNavController().navigate(R.id.contextSettingsFragment)
             R.id.weeklyReview -> findNavController().navigate(R.id.reviewFragment)
             R.id.hiddenApps -> showHiddenAppsDialog()
             R.id.exportConfig -> configTransfer.export()
@@ -140,6 +144,9 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
         binding.setLauncher.setOnClickListener(this)
         binding.runSetup.setOnClickListener(this)
         binding.syncTodoist.setOnClickListener(this)
+        binding.stagesRow.setOnClickListener(this)
+        binding.groupsRow.setOnClickListener(this)
+        binding.contextSettingsRow.setOnClickListener(this)
         binding.weeklyReview.setOnClickListener(this)
         binding.hiddenApps.setOnClickListener(this)
         binding.exportConfig.setOnClickListener(this)

@@ -105,6 +105,33 @@
                     android:text="@string/sync_todoist_now" />
 
                 <TextView
+                    android:id="@+id/stagesRow"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/settings_stages" />
+
+                <TextView
+                    android:id="@+id/groupsRow"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/settings_groups" />
+
+                <TextView
+                    android:id="@+id/contextSettingsRow"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/settings_context" />
+
+                <TextView
                     android:id="@+id/weeklyReview"
                     style="@style/TextSmall"
                     android:layout_width="wrap_content"
