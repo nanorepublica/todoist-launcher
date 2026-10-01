@@ -23,6 +23,10 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 ./gradlew :app:testDebugUnitTest
 ```
 
+`docs/TESTING.md` has the manual walkthroughs. Debug builds carry a shifted
+clock and a scenario runner (Settings > Debug, or the adb broadcast in that
+file) so stage changes can be watched without waiting for the real hour.
+
 If Robolectric fails to fetch `android-all-instrumented` with HTTP 429, the
 session proxy capped its parallel downloads: fetch the jar, .pom and both
 .sha512 files one at a time with curl into
@@ -46,7 +50,7 @@ build (see below): its tests run even without the SDK.
 SPEC.md                         v1 spec (source of truth)
 core/                           standalone Gradle build, pure Kotlin/JVM
   src/main/kotlin/uk/co/softwarecrafts/contextlauncher/core/
-    Clock.kt                    Clock interface + SystemClock
+    Clock.kt                    Clock interface, SystemClock, OffsetClock (debug time travel)
     config/Config.kt            LauncherConfig, Stage, StageTrigger, AppGroup...
     config/ConfigJson.kt        the one JSON codec (export file + Room columns)
     config/ConfigValidator.kt   cross-field checks; import is rejected on problems
@@ -105,6 +109,12 @@ app/                            Android app (Olauncher fork)
     ui/settings/StageEditFragment.kt    every Stage field, trigger parameters by type
     ui/settings/GroupEditFragment.kt    name, kind, members with caps
     ui/settings/ContextSettingsFragment.kt calendar, always allowed, label groups, Claude
+    ui/HomeGestureLayout.kt     home root: swipes from any row, taps stay with rows
+    ui/DebugFragment.kt         debug builds: clock shift, scenarios, last events
+    debug/DebugTime.kt          shifts Graph.clock, persists, pokes engine and gate
+    debug/DebugReceiver.kt      adb broadcast (declared in src/debug/AndroidManifest.xml)
+    debug/Scenarios.kt          clock + Todoist test tasks per feature; cleanUp
+docs/TESTING.md                 manual test plan: scenarios, adb commands, expectations
   src/main/java/app/olauncher/  borrowed Olauncher code, package kept as-is
     MainActivity.kt             single activity, nav host, back handling
     MainViewModel.kt            app list, launching, home apps, screen time
@@ -137,7 +147,13 @@ included build. `core/settings.gradle` reuses the root version catalog.
   JSON text columns encoded with the core codec, not join tables. Schema
   changes: bump AppDatabase.VERSION, add a Migration, commit app/schemas.
 - Dependencies come from `Graph` (a small service locator), not a DI
-  framework.
+  framework. `Graph.clock` is an `OffsetClock`: zero offset in release
+  builds, shiftable in debug builds through `DebugTime`. Nothing reads
+  `Instant.now()` or `LocalDate.now()` directly except export file names.
+- The home root (`HomeGestureLayout`) feeds every touch to the swipe detector
+  and intercepts once a drag is clearly sideways, or vertical while the column
+  fits the screen. Rows keep their taps. Do not put the gesture listener on
+  individual views again; that is what broke swipes as the home filled up.
 - Settings forms are rows plus dialogs (`ui/settings`), not preference XML:
   text-only, same look as the rest of the launcher, and every write goes
   through the validator.
