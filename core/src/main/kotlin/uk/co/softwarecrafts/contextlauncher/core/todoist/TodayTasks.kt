@@ -3,7 +3,11 @@ package uk.co.softwarecrafts.contextlauncher.core.todoist
 import uk.co.softwarecrafts.contextlauncher.core.stage.TaskSnapshot
 import java.time.LocalDate
 
-/** What the home screen lists: open tasks due today or overdue, gating ones first. */
+/**
+ * What the home screen lists (SPEC.md "today's tasks"): open tasks due today,
+ * gating ones first. Overdue tasks stay off the home screen unless they carry
+ * the current stage's label, because those are holding the stage locked.
+ */
 object TodayTasks {
 
     data class Row(val task: TaskSnapshot, val gating: Boolean, val overdue: Boolean)
@@ -12,6 +16,7 @@ object TodayTasks {
         tasks.asSequence()
             .filter { !it.completed && it.due != null && !it.due.isAfter(today) }
             .map { Row(it, gating = gatingLabel != null && gatingLabel in it.labels, overdue = it.due!!.isBefore(today)) }
+            .filter { !it.overdue || it.gating }
             .sortedWith(
                 compareByDescending<Row> { it.gating }
                     .thenByDescending { it.overdue }

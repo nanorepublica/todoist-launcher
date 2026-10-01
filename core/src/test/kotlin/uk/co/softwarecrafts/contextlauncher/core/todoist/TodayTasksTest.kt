@@ -12,7 +12,7 @@ class TodayTasksTest {
         TaskSnapshot(id, "task $id", labels, due, time, done)
 
     @Test
-    fun `gating first, then overdue, then timed, then the rest by name`() {
+    fun `today only - gating first, then timed, then the rest by name`() {
         val rows = TodayTasks.rows(
             listOf(
                 t("z"), t("a"), t("timed", time = LocalTime.of(14, 0)),
@@ -21,8 +21,19 @@ class TodayTasksTest {
             ),
             today, gatingLabel = "phone/morning",
         )
-        assertEquals(listOf("gate", "old", "timed", "a", "z"), rows.map { it.task.id })
+        assertEquals(listOf("gate", "timed", "a", "z"), rows.map { it.task.id })
         assertEquals(true, rows[0].gating)
-        assertEquals(true, rows[1].overdue)
+    }
+
+    @Test
+    fun `an overdue task that gates the current stage is still shown, other overdue tasks are not`() {
+        val rows = TodayTasks.rows(
+            listOf(t("oldgate", due = today.minusDays(1), labels = setOf("phone/morning")), t("old", due = today.minusDays(1)), t("now")),
+            today, gatingLabel = "phone/morning",
+        )
+        assertEquals(listOf("oldgate", "now"), rows.map { it.task.id })
+        assertEquals(true, rows[0].overdue)
+        // With a different stage active the same overdue labelled task is hidden
+        assertEquals(listOf("now"), TodayTasks.rows(listOf(t("oldgate", due = today.minusDays(1), labels = setOf("phone/morning")), t("now")), today, gatingLabel = null).map { it.task.id })
     }
 }

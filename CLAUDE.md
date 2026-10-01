@@ -221,6 +221,9 @@ included build. `core/settings.gradle` reuses the root version catalog.
   optimistic and reverted on failure.
 - A task stage with no tasks carrying its label today simply runs its
   calendar block; "done" needs at least one such task, all complete.
+- The home screen lists tasks due today only (SPEC.md lines 49 and 55).
+  Overdue tasks are left to Todoist, except an overdue task carrying the
+  current stage's label, which still shows because it holds the stage locked.
 - The stage calendar is identified by display name (portable in the config
   export). Onboarding can create a device-local calendar ("Phone stages",
   ACCOUNT_TYPE_LOCAL: on this phone only, never synced) or use any synced
