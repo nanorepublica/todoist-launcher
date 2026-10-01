@@ -190,9 +190,10 @@ included build. `core/settings.gradle` reuses the root version catalog.
    SpeechRecognizer, on-device when available, prefer-offline, partial
    results shown, transcript editable) and routes to a Todoist quick-add
    task, the Claude app via ACTION_SEND, or the clipboard; Claude is hidden
-   in `settings.claudeHiddenStages` (default wind_down). "add task" starts
-   Todoist's Ramble app shortcut through LauncherApps (falls back to opening
-   Todoist); long-press is a typed quick add. Setup step 7 shows the device
+   in `settings.claudeHiddenStages` (default wind_down). "add task" tries
+   Todoist's Ramble app shortcut through LauncherApps, then the
+   `todoist://addtask` URL (the Fairphone 5 sees no Ramble shortcut), then
+   plain Todoist; long-press is a typed quick add. Setup step 7 shows the device
    checks: mic permission, on-device recognition, Claude installed, Todoist
    shortcuts seen.
 6. Usage logging and weekly review with one-tap Apply suggestions.

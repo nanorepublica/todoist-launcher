@@ -2,6 +2,7 @@ package uk.co.softwarecrafts.contextlauncher.voice
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
 import android.os.Process
@@ -50,11 +51,36 @@ object Ramble {
         }
     }
 
+    /** Todoist's URL scheme: opens the add-task sheet (with its own mic button) straight away. */
+    fun addTaskIntent(context: Context): Intent? {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ADD_TASK_URL))
+            .setPackage(TODOIST_PACKAGE)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        return intent.takeIf { context.packageManager.resolveActivity(it, 0) != null }
+    }
+
+    fun openAddTask(context: Context): Boolean {
+        val intent = addTaskIntent(context) ?: return false
+        return runCatching { context.startActivity(intent) }.isSuccess
+    }
+
     fun openTodoist(context: Context): Boolean {
         val intent = context.packageManager.getLaunchIntentForPackage(TODOIST_PACKAGE) ?: return false
         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         return true
     }
+
+    /** What "add task" does: Ramble shortcut, else the add-task URL, else Todoist itself. */
+    enum class Route { RAMBLE, ADD_TASK_URL, TODOIST, NONE }
+
+    fun addTask(context: Context): Route = when {
+        start(context) -> Route.RAMBLE
+        openAddTask(context) -> Route.ADD_TASK_URL
+        openTodoist(context) -> Route.TODOIST
+        else -> Route.NONE
+    }
+
+    const val ADD_TASK_URL = "todoist://addtask"
 
     private fun ShortcutInfo.toFound() = Found(id, (shortLabel ?: longLabel ?: id).toString())
 }

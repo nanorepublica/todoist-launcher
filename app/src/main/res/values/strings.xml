@@ -108,7 +108,7 @@
     <string name="quick_add_title">Quick add</string>
     <string name="quick_add_hint">e.g. Call dentist tomorrow 9am @life_admin</string>
     <string name="add">Add</string>
-    <string name="ramble_missing">Ramble shortcut not found; opening Todoist</string>
+    <string name="ramble_missing">No Ramble shortcut or add-task link; opening Todoist</string>
     <string name="todoist_missing">Todoist is not installed</string>
     <string name="onboarding_step_voice">7. Voice</string>
     <string name="onboarding_voice_why">"speak" uses Android\'s built-in recognizer, on-device when available, and keeps no audio. "add task" starts Todoist\'s Ramble shortcut. The lines below are the device checks from the spec.</string>
@@ -122,6 +122,8 @@
     <string name="onboarding_shortcuts">Todoist shortcuts: %1$s</string>
     <string name="onboarding_shortcuts_none">○ Todoist publishes no shortcuts the launcher can see (is it installed, and is this the default launcher?)</string>
     <string name="onboarding_ramble_yes">✓ Ramble shortcut found: %1$s</string>
+    <string name="onboarding_addtask_yes">✓ todoist://addtask link handled by Todoist</string>
+    <string name="onboarding_addtask_no">○ todoist://addtask link not handled</string>
     <string name="onboarding_open_speech_settings">On-device speech settings</string>
     <string name="app_hide">Hide (background app)</string>
     <string name="app_occasional_on">Occasional: show only when searching</string>

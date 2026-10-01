@@ -181,6 +181,7 @@ class OnboardingFragment : Fragment() {
                     shortcuts.isEmpty() -> append(getString(R.string.onboarding_shortcuts_none))
                     else -> append(getString(R.string.onboarding_shortcuts, shortcuts.joinToString { it.label }))
                 }
+                append("\n").append(getString(if (Ramble.addTaskIntent(ctx) != null) R.string.onboarding_addtask_yes else R.string.onboarding_addtask_no))
             }
         }
     }

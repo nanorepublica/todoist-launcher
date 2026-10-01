@@ -275,9 +275,11 @@ class HomeFragment : Fragment() {
 
     private fun startRamble() {
         val ctx = requireContext()
-        if (Ramble.start(ctx)) return
-        ctx.showToast(getString(R.string.ramble_missing))
-        if (!Ramble.openTodoist(ctx)) ctx.showToast(getString(R.string.todoist_missing))
+        when (Ramble.addTask(ctx)) {
+            Ramble.Route.RAMBLE, Ramble.Route.ADD_TASK_URL -> Unit
+            Ramble.Route.TODOIST -> ctx.showToast(getString(R.string.ramble_missing))
+            Ramble.Route.NONE -> ctx.showToast(getString(R.string.todoist_missing))
+        }
     }
 
     private fun showQuickAdd() {
