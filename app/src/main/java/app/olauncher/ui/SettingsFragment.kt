@@ -19,6 +19,7 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import app.olauncher.BuildConfig
 import app.olauncher.MainViewModel
@@ -103,6 +104,7 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
             R.id.groupsRow -> findNavController().navigate(R.id.configListFragment, androidx.core.os.bundleOf(ConfigListFragment.ARG_SECTION to ConfigListFragment.SECTION_GROUPS))
             R.id.contextSettingsRow -> findNavController().navigate(R.id.contextSettingsFragment)
             R.id.weeklyReview -> findNavController().navigate(R.id.reviewFragment)
+            R.id.debugRow -> findNavController().navigate(R.id.debugFragment)
             R.id.hiddenApps -> showHiddenAppsDialog()
             R.id.exportConfig -> configTransfer.export()
             R.id.importConfig -> showDialog(
@@ -148,6 +150,8 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
         binding.groupsRow.setOnClickListener(this)
         binding.contextSettingsRow.setOnClickListener(this)
         binding.weeklyReview.setOnClickListener(this)
+        binding.debugRow.isVisible = BuildConfig.DEBUG
+        binding.debugRow.setOnClickListener(this)
         binding.hiddenApps.setOnClickListener(this)
         binding.exportConfig.setOnClickListener(this)
         binding.importConfig.setOnClickListener(this)

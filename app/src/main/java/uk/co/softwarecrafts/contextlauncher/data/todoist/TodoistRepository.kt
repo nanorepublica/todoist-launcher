@@ -141,6 +141,26 @@ class TodoistRepository(
         return item
     }
 
+    /** Creates a task with an explicit due date and labels (debug scenarios). */
+    suspend fun addTask(content: String, dueDate: java.time.LocalDate, dueTime: java.time.LocalTime?, labels: List<String>): ItemDto {
+        val token = tokens.token ?: throw IllegalStateException("No Todoist token")
+        val item = api.addTask(token, content, dueDate, dueTime, labels)
+        replaceAll(currentItems() + (item.id to item))
+        onTasksChanged()
+        return item
+    }
+
+    /** Deletes a task in Todoist and drops it from the cache (debug scenarios clean-up). */
+    suspend fun delete(taskId: String) {
+        val token = tokens.token ?: throw IllegalStateException("No Todoist token")
+        api.deleteTask(token, taskId)
+        replaceAll(currentItems() - taskId)
+        onTasksChanged()
+    }
+
+    /** Open cached tasks, as the raw API items. */
+    suspend fun openItems(): List<ItemDto> = currentItems().values.filter { !it.checked && !it.isDeleted }
+
     /** Every label the config refers to must exist in Todoist, or tasks cannot carry it. */
     private suspend fun ensureLabels(token: String, existing: Set<String>) {
         val needed = labelsIn(config.load())

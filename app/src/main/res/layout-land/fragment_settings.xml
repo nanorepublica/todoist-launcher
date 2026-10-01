@@ -176,6 +176,16 @@
                     android:paddingVertical="8dp"
                     android:text="@string/reset_config" />
 
+                <TextView
+                    android:id="@+id/debugRow"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/debug_row"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
             <LinearLayout

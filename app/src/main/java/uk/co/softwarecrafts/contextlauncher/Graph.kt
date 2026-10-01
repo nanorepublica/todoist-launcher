@@ -2,8 +2,7 @@ package uk.co.softwarecrafts.contextlauncher
 
 import android.content.Context
 import uk.co.softwarecrafts.contextlauncher.calendar.CalendarStore
-import uk.co.softwarecrafts.contextlauncher.core.Clock
-import uk.co.softwarecrafts.contextlauncher.core.SystemClock
+import uk.co.softwarecrafts.contextlauncher.core.OffsetClock
 import uk.co.softwarecrafts.contextlauncher.data.ConfigRepository
 import uk.co.softwarecrafts.contextlauncher.data.EventLogRepository
 import uk.co.softwarecrafts.contextlauncher.data.db.AppDatabase
@@ -25,7 +24,8 @@ object Graph {
     @Volatile private var todoist: TodoistRepository? = null
     @Volatile private var gate: GateController? = null
 
-    val clock: Clock = SystemClock()
+    /** Real time in release builds; debug builds can shift it (Settings > Debug, or the adb broadcast). */
+    val clock = OffsetClock()
 
     fun db(context: Context): AppDatabase =
         database ?: synchronized(this) {
@@ -35,6 +35,7 @@ object Graph {
     /** Tests only: drop every singleton so the next test starts from a fresh process state. */
     fun resetForTests() {
         synchronized(this) {
+            clock.reset()
             engine?.close()
             engine = null
             todoist = null
@@ -51,7 +52,7 @@ object Graph {
     fun stageEngine(context: Context): StageEngine =
         engine ?: synchronized(this) {
             engine ?: StageEngine(
-                context = context.applicationContext,
+                context = context.applicationContext.also { uk.co.softwarecrafts.contextlauncher.debug.DebugTime.restore(it) },
                 clock = clock,
                 config = config(context),
                 eventLog = eventLog(context),

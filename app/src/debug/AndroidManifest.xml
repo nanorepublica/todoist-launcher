@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Debug builds only: adb time travel and scenario runner, see DebugReceiver -->
+        <receiver
+            android:name="uk.co.softwarecrafts.contextlauncher.debug.DebugReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="uk.co.softwarecrafts.contextlauncher.DEBUG" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

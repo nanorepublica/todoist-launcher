@@ -21,6 +21,11 @@ class AppPrefs(context: Context) {
         get() = prefs.getString(REVIEW_OPENED_TASK, null)
         set(value) = prefs.edit { if (value == null) remove(REVIEW_OPENED_TASK) else putString(REVIEW_OPENED_TASK, value) }
 
+    /** Debug builds only: the clock shift in milliseconds, so it survives a restart. */
+    var debugClockOffsetMs: Long
+        get() = prefs.getLong(DEBUG_OFFSET, 0L)
+        set(value) = prefs.edit { if (value == 0L) remove(DEBUG_OFFSET) else putLong(DEBUG_OFFSET, value) }
+
     fun loadBypassCounter(): BypassCounter =
         BypassCounter(prefs.getString(COUNTER_KEY, "") ?: "", prefs.getInt(COUNTER_COUNT, 0))
 
@@ -61,6 +66,7 @@ class AppPrefs(context: Context) {
     private companion object {
         const val ONBOARDING_DONE = "onboarding_done"
         const val REVIEW_OPENED_TASK = "review_opened_task"
+        const val DEBUG_OFFSET = "debug_clock_offset_ms"
         const val COUNTER_KEY = "bypass_block"
         const val COUNTER_COUNT = "bypass_count"
         const val S_PACKAGE = "session_package"

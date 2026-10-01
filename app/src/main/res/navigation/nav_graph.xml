@@ -118,6 +118,12 @@
         tools:layout="@layout/fragment_form" />
 
     <fragment
+        android:id="@+id/debugFragment"
+        android:name="uk.co.softwarecrafts.contextlauncher.ui.DebugFragment"
+        android:label="debug_fragment"
+        tools:layout="@layout/fragment_form" />
+
+    <fragment
         android:id="@+id/onboardingFragment"
         android:name="uk.co.softwarecrafts.contextlauncher.ui.OnboardingFragment"
         android:label="OnboardingFragment"

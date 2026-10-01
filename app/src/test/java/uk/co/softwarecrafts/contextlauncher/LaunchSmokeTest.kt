@@ -138,6 +138,34 @@ class LaunchSmokeTest {
         controller.pause().stop().destroy()
     }
 
+    @Test
+    fun `a sideways swipe that starts on a home row opens the app list`() {
+        AppPrefs(app).onboardingDone = true
+        val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
+        ShadowLooper.idleMainLooper()
+        val activity = controller.get()
+        val nav = activity.findNavController(R.id.nav_host_fragment)
+        val root = activity.findViewById<android.view.View>(R.id.mainLayout)
+        activity.findViewById<android.view.View>(R.id.tvStage).let { stage ->
+            // Fling leftwards starting on the stage row (a clickable TextView)
+            val x0 = 600f; val y0 = stage.y + stage.height / 2f + root.paddingTop + 40f
+            val t0 = android.os.SystemClock.uptimeMillis()
+            fun ev(action: Int, dt: Long, x: Float) = android.view.MotionEvent.obtain(t0, t0 + dt, action, x, y0, 0)
+            root.dispatchTouchEvent(ev(android.view.MotionEvent.ACTION_DOWN, 0, x0))
+            root.dispatchTouchEvent(ev(android.view.MotionEvent.ACTION_MOVE, 20, x0 - 120f))
+            root.dispatchTouchEvent(ev(android.view.MotionEvent.ACTION_MOVE, 40, x0 - 300f))
+            root.dispatchTouchEvent(ev(android.view.MotionEvent.ACTION_UP, 60, x0 - 450f))
+        }
+        ShadowLooper.idleMainLooper()
+        assertEquals(R.id.appListFragment, nav.currentDestination?.id)
+
+        nav.popBackStack(R.id.mainFragment, false)
+        nav.navigate(R.id.debugFragment)
+        ShadowLooper.idleMainLooper()
+        assertEquals(R.id.debugFragment, nav.currentDestination?.id)
+        controller.pause().stop().destroy()
+    }
+
     private fun awaitResolved(engine: StageEngine): StageState {
         engine.refresh()
         val deadline = System.currentTimeMillis() + 10_000

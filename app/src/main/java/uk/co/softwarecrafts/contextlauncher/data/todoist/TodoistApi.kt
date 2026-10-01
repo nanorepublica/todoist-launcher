@@ -86,6 +86,30 @@ class TodoistApi(
         TodoistJson.decodeItem(execute(request))
     }
 
+    /** Creates a task with an explicit due date (and optional time) and labels; used by the debug scenarios. */
+    suspend fun addTask(token: String, content: String, dueDate: java.time.LocalDate, dueTime: java.time.LocalTime?, labels: List<String>): ItemDto =
+        withContext(Dispatchers.IO) {
+            val body = buildString {
+                append("{\"content\":").append(TodoistJson.json.encodeToString(String.serializer(), content))
+                append(",\"labels\":").append(TodoistJson.encodeStrings(labels))
+                if (dueTime == null) append(",\"due_date\":\"").append(dueDate).append('"')
+                else append(",\"due_datetime\":\"").append(dueDate.atTime(dueTime)).append(":00\"")
+                append('}')
+            }
+            val request = Request.Builder()
+                .url(baseUrl + "tasks")
+                .header("Authorization", "Bearer $token")
+                .post(body.toRequestBody("application/json".toMediaType()))
+                .build()
+            TodoistJson.decodeItem(execute(request))
+        }
+
+    suspend fun deleteTask(token: String, id: String) = withContext(Dispatchers.IO) {
+        val request = Request.Builder().url(baseUrl + "tasks/" + id).header("Authorization", "Bearer $token").delete().build()
+        execute(request)
+        Unit
+    }
+
     private fun execute(request: Request): String {
         client.newCall(request).execute().use { response ->
             val body = response.body?.string().orEmpty()
