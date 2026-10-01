@@ -77,17 +77,36 @@ fun Context.createDialog(
     onNeutral: () -> Unit = {},
     onAction: () -> Unit = {},
     content: ((ViewGroup) -> View)? = null,
+): OlDialog = createDialog(
+    title = getString(title),
+    action = getString(action),
+    message = if (message != 0) getString(message) else null,
+    neutral = if (neutral != 0) getString(neutral) else null,
+    onNeutral = onNeutral,
+    onAction = onAction,
+    content = content,
+)
+
+/** Same dialog with runtime strings, for titles built from config (stage names, labels). */
+fun Context.createDialog(
+    title: CharSequence,
+    action: CharSequence,
+    message: CharSequence? = null,
+    neutral: CharSequence? = null,
+    onNeutral: () -> Unit = {},
+    onAction: () -> Unit = {},
+    content: ((ViewGroup) -> View)? = null,
 ): OlDialog {
     val dialog = OlDialog(this)
     val binding = DialogBaseBinding.inflate(LayoutInflater.from(dialog.context))
-    binding.tvTitle.setText(title)
-    binding.tvAction.setText(action)
-    if (message != 0) {
-        binding.tvMessage.setText(message)
+    binding.tvTitle.text = title
+    binding.tvAction.text = action
+    if (message != null) {
+        binding.tvMessage.text = message
         binding.tvMessage.isVisible = true
     }
-    if (neutral != 0) {
-        binding.tvNeutral.setText(neutral)
+    if (neutral != null) {
+        binding.tvNeutral.text = neutral
         binding.tvNeutral.isVisible = true
     }
     content?.let {

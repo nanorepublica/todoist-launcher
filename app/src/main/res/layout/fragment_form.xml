@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/pageBackgroundColor"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="64dp">
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/TextLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?attr/primaryColor"
+            tools:text="Stage" />
+
+        <TextView
+            android:id="@+id/subtitle"
+            style="@style/TextSmallLight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:visibility="gone"
+            tools:text="Tap a row to change it" />
+
+        <LinearLayout
+            android:id="@+id/fields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="36dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/save"
+                style="@style/SetupButton"
+                android:text="@string/save"
+                android:textColor="?attr/primaryColor" />
+
+            <TextView
+                android:id="@+id/delete"
+                style="@style/SetupButton"
+                android:layout_marginStart="10dp"
+                android:text="@string/settings_delete" />
+
+            <TextView
+                android:id="@+id/cancel"
+                style="@style/SetupButton"
+                android:layout_marginStart="10dp"
+                android:text="@string/cancel" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
